@@ -5,9 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+
+import androidx.compose.foundation.layout.fillMaxSize
+
 //import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,6 +19,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
+import com.example.medishareandroid.user.Signup
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,14 +29,17 @@ import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
 import com.example.medishareandroid.user.ForgotPasswordScreen
 import com.example.medishareandroid.user.LoginScreen
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MediSHareAndroidTheme {
+
                 val navController = rememberNavController()
                 val showToolbar = remember { mutableStateOf(true) }
+
 
 
                 Scaffold(modifier = Modifier
@@ -65,6 +74,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -72,7 +82,9 @@ fun GreetingPreview() {
         Column {
             val navController = rememberNavController()
 
+
             LoginScreen(navController)
+
         }
     }
 }
