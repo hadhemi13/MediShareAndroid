@@ -5,11 +5,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -18,6 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
 import com.example.medishareandroid.user.Signup
+
+
+import com.example.medishareandroid.user.ForgotPasswordScreen
 import com.example.medishareandroid.user.LoginScreen
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +33,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MediSHareAndroidTheme {
                 val navController = rememberNavController() // Initialize NavController
-
+                val showToolbar = remember { mutableStateOf(true) }
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
@@ -48,10 +54,19 @@ class MainActivity : ComponentActivity() {
                                     .padding(16.dp)
                             )
                         }
-                        composable("loginScreen") {
-                            LoginScreen() // Remplacez par votre écran de connexion
+                        composable(route = "login") {
+                            showToolbar.value = false
+                            LoginScreen(navController, modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .padding(16.dp) )
+                        }
+                        composable(route = "forgotPassword") {
+                            showToolbar.value = true
+                            ForgotPasswordScreen(navController, modifier = Modifier)
                         }
                     }
+
                 }
             }
         }
@@ -62,6 +77,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     MediSHareAndroidTheme {
-        LoginScreen()
+
+        Column  {
+            val navController = rememberNavController()
+
+            LoginScreen(navController)
+
+        }
+
     }
 }
