@@ -53,6 +53,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
 import com.example.medishareandroid.models.User
 import com.example.medishareandroid.remote.RetrofitInstance
@@ -62,7 +64,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(navController:NavHostController, modifier: Modifier = Modifier) {
     //tates for Username and Password
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
@@ -225,6 +227,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 pop()
             },
             onClick = {
+                navController.navigate("forgotPassword")
             },
             style = androidx.compose.ui.text.TextStyle(
                 fontSize = 16.sp,
@@ -290,7 +293,8 @@ fun handleNavigation(context:Context, email: MutableState<String>, password: Mut
 @Preview(showBackground = true)
 @Composable
 fun LoginPreviaw() {
+    val navController = rememberNavController()
 
-    LoginScreen()
+    LoginScreen(navController)
 
 }

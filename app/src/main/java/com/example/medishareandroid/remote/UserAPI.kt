@@ -9,4 +9,12 @@ import retrofit2.http.POST
 interface UserAPI {
     @POST("login")
     fun login(@Body user: User): Call<User>
+    @POST("forgot-password")
+    fun forgetPassword(@Body forgotPasswordDto: ForgotPasswordDto): Call<Message>
 }
+data class Message(
+    val message: String
+)
+data class ForgotPasswordDto(
+    val email: String
+)

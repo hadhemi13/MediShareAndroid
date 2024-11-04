@@ -62,7 +62,8 @@ dependencies {
     //retrofit import
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
+    //nav controller
+    implementation("androidx.navigation:navigation-compose:2.8.3")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
