@@ -25,6 +25,8 @@ import com.example.medishareandroid.user.Signup
 
 import com.example.medishareandroid.user.ForgotPasswordScreen
 import com.example.medishareandroid.user.LoginScreen
+import com.example.medishareandroid.user.NewPassword
+import com.example.medishareandroid.user.RecoveryCodeSceen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = "signup" // Pas d'espaces ici
+                        startDestination = "launchScreen" // Pas d'espaces ici
                     ) { // Définissez le NavHost
                         composable("launchScreen") {
                             LaunchScreenContent(navController = navController) // Appeler la fonction composable LaunchScreenContent
@@ -64,6 +66,12 @@ class MainActivity : ComponentActivity() {
                         composable(route = "forgotPassword") {
                             showToolbar.value = true
                             ForgotPasswordScreen(navController, modifier = Modifier)
+                        }
+                        composable("forgotPasswordMail") {
+                            RecoveryCodeSceen(navController = navController) // Appeler la fonction composable LaunchScreenContent
+                        }
+                        composable("newPassword/{resetToken}") { backStackEntry ->
+                            NewPassword(navController = navController, resetToken = backStackEntry.arguments?.getString("resetToken")) // Appeler la fonction composable LaunchScreenContent
                         }
                     }
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,11 +60,7 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
     val useremailError = remember { mutableStateOf("") }
     val passwordError = remember { mutableStateOf("") }
     val confirmPasswordError = remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
 
-    val myFontFamily = FontFamily(
-        Font(R.font.itimregular), // Remplacez par le nom de votre fichier de police
-    )
     val mediFontFamily = FontFamily(
         Font(R.font.chewyregular), // Remplacez par le nom de votre fichier de police
     )
@@ -98,7 +95,7 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
             .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(Color.White,Color(0xFF90CAF9)), // Dégradé du blanc au bleu
+                    colors = listOf(colorResource(R.color.passback),colorResource(R.color.passback)), // Dégradé du blanc au bleu
                     start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -115,16 +112,15 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Image(
-            painter = painterResource(R.drawable.backgroundlog),
+            painter = painterResource(R.drawable.logo),
             contentDescription = "background",
-            modifier = Modifier.padding(10.dp).padding(top = 10.dp).size(100.dp)
+            modifier = Modifier.padding(10.dp).padding(top = 20.dp).size(140.dp)
         )
         Text(
             text = "Welcome to",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color =  colorResource(R.color.sign),
-            fontFamily = myFontFamily,
 
 
             )
@@ -425,11 +421,14 @@ color = colorResource(R.color.sign),
             text = "Already have an account? Login",
             fontSize = 16.sp,
             color = colorResource(R.color.sign), // Utilisez une couleur qui se démarque
+            textDecoration = TextDecoration.Underline,
+
             modifier = Modifier
                 .padding(20.dp).padding(bottom = 15.dp)
                 .clickable {
-                    navController.navigate("loginScreen") // Navigation vers l'écran de connexion
+                    navController.navigate("login")
                 },
+
             textAlign = TextAlign.Center // Centrez le texte si vous le souhaitez
         )
     }

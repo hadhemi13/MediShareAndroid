@@ -94,12 +94,14 @@ fun LaunchScreenContent(navController: NavController) {
 verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.weight(7f))
+
         Image(
             painter = painterResource(id = imageIds[currentIndex]),
             contentDescription = null,
             modifier = Modifier
-                .size(500.dp)
-                .padding(start = 15.dp).padding(end = 10.dp)
+                .size(400.dp)
+                .padding(start = 15.dp).padding(end = 10.dp).padding(top = 70.dp).padding(bottom = 70.dp)
         )
         Box(
             modifier = Modifier
@@ -121,7 +123,7 @@ verticalArrangement = Arrangement.Center,
 
                     )
                 Button(
-                    onClick = { navController.navigate("loginScreen") // Navigation vers l'écran de connexion
+                    onClick = { navController.navigate("login") // Navigation vers l'écran de connexion
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(R.color.signupdeg)
