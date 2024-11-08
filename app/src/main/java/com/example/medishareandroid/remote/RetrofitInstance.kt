@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 // 10.0.2.2 adresse locale de l'émulateur
-const val BASE_URL = "http://172.18.21.224:3000/auth/"
+const val BASE_URL = "http://192.168.0.112:3000/auth/"
 //const val BASE_URL = "http://192.168.1.156:3000/auth/"
 
 abstract class RetrofitInstance {
