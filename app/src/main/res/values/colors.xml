@@ -9,12 +9,18 @@
     <color name="white">#FFFFFFFF</color>
     <color name="bleu">#2260FF</color>
     <color name="sign">#113155</color>
-    <color name="signup">#034a82</color>
+    <color name="signup">#2196F3</color>
     <color name="buttonsignup">#91c7d2</color>
     <color name="signupbutton">#488fb7</color>
     <color name="signupdeg">#5289c1 </color>
-    <color name="signupdegg">#5c9fcf </color>
+    <color name="signupdegg">#BBDEFB </color>
     <color name="liensign">#A5DBE6 </color>
+    <color name="passback">#C8E4FB   </color>
+
+
+    <color name="box">#87B4DE   </color>
+
+
 
 
 

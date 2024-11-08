@@ -38,6 +38,8 @@ import androidx.compose.ui.Modifier
 //import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
@@ -56,8 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.medishareandroid.models.User
 import com.example.medishareandroid.remote.ForgotPasswordDto
 import com.example.medishareandroid.remote.Message
+import com.example.medishareandroid.remote.ResetPasswordDto
+import com.example.medishareandroid.remote.ResetToken
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.UserAPI
 import retrofit2.Call
@@ -66,17 +71,26 @@ import retrofit2.Response
 
 
 @Composable
-fun ForgotPasswordScreen(navController: NavHostController, modifier: Modifier = Modifier) {
-    val fEmail = remember { mutableStateOf("") }
+fun NewPassword(navController: NavHostController, modifier: Modifier = Modifier, resetToken: String?) {
+    Log.d("test1","_____________________________________")
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val usernameFocusRequester = FocusRequester()
+    val password = remember { mutableStateOf("") }
+    val confirmpassword = remember { mutableStateOf("") }
+    val passwordError = remember { mutableStateOf("") }
+    val confirmPasswordError = remember { mutableStateOf("") }
+    fun isValidPassword(password: String): Boolean {
+        return password.length >= 4 &&
+                password.any { it.isDigit() } &&
+                password.any { it.isUpperCase() } &&
+                password.any { it.isLowerCase() }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.passback))
+            .background(colorResource(com.example.medishareandroid.R.color.passback))
 
     )
     Column(
@@ -85,18 +99,18 @@ fun ForgotPasswordScreen(navController: NavHostController, modifier: Modifier = 
         verticalArrangement = Arrangement.Bottom,
 
 
-    ) {
+        ) {
         Spacer(modifier = Modifier.weight(0.8f))
 
         Image(
-            painter = painterResource(R.drawable.mdp),
+            painter = painterResource(R.drawable.lock),
             contentDescription = "background",
-            modifier = Modifier.padding(10.dp).padding(end = 25.dp).padding(start = 30.dp).padding(top = 10.dp).size(140.dp)
+            modifier = Modifier.padding(10.dp).padding(top = 10.dp).size(100.dp)
         )
         Spacer(modifier = Modifier.weight(0.2f))
 
         Text(
-            text = "Please enter your Email adress to recieve a verification code.",
+            text = "Your new password must be different from the previously used password.",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color =  colorResource(R.color.sign),
@@ -105,77 +119,68 @@ fun ForgotPasswordScreen(navController: NavHostController, modifier: Modifier = 
                 .padding(end = 25.dp)
                 .padding(start = 25.dp)
 
-            )
-        OutlinedTextField(
-            value = fEmail.value,
-            onValueChange = { fEmail.value = it },
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .padding(top = 40.dp)
-                .padding(end = 25.dp)
-                .padding(start = 25.dp)
-                .padding(bottom = 30.dp)
-                .focusRequester(usernameFocusRequester),
-            /*textStyle = androidx.compose.ui.text.TextStyle(
-                color = Color.Black,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            ),*/
-            label = {
-                Text(
-                    "Email",
-                    color = colorResource(R.color.sign) // Change la couleur ici
-                )
+        )
+        PasswordField(
+            password = password.value,
+            onPasswordChange = { newPassword ->
+                password.value = newPassword
+                passwordError.value = if (isValidPassword(newPassword)) {
+                    "" // Clear error if valid
+                } else {
+                    "Password must be at least 4 characters, contain a digit, an uppercase letter, and a lowercase letter."
+                }
             },
-
-            //keyboardOptions with ImeAction.Next for navigate to next field
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                //keyboardActions lets focusManager move focus downward
-                onDone = {
-                    keyboardController?.hide() // Hide the keyboard when Done is pressed
-                    focusManager.clearFocus()  // Clear focus from the text field
-                    // Trigger login or other actions here if necessary
-                }),
-            colors = TextFieldDefaults.colors(
-                unfocusedTextColor = colorResource(R.color.sign),
-                unfocusedLabelColor = Color.Transparent,
-                unfocusedLeadingIconColor = colorResource(R.color.sign),
-                unfocusedIndicatorColor = colorResource(R.color.sign),
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.sign),
-                focusedLabelColor = Color.Transparent,
-                focusedLeadingIconColor = colorResource(R.color.sign),
-                focusedIndicatorColor = colorResource(R.color.sign),
-                focusedContainerColor = Color.Transparent
-            ),
-            singleLine = true
-
+            label = "New Password",
+            isError = passwordError.value.isNotEmpty() // Set isError based on password error
         )
 
+        if (passwordError.value.isNotEmpty()) {
+            Text(
+                text = passwordError.value,
+                color = colorResource(R.color.sign),
+                modifier = Modifier.padding(start = 25.dp, end = 25.dp)
+            )
+        }
+
+// Confirm Password Field
+        PasswordField(
+            password = confirmpassword.value,
+            onPasswordChange = { confirmPasswordInput ->
+                confirmpassword.value = confirmPasswordInput
+                confirmPasswordError.value = if (confirmPasswordInput == password.value) {
+                    "" // Clear error if passwords match
+                } else {
+                    "Passwords do not match."
+                }
+            },
+            label = "Confirm Password",
+            isError = confirmPasswordError.value.isNotEmpty() // Set isError based on confirm password error
+        )
+
+        if (confirmPasswordError.value.isNotEmpty()) {
+            Text(
+                text = confirmPasswordError.value,
+                color = colorResource(R.color.sign),
+                modifier = Modifier.padding(start = 25.dp, end = 25.dp)
+            )
+        }
         Button(
             onClick = {
-
-
-
-                //clear focus of fields
+               ///clear focus of fields
                 focusManager.clearFocus()
                 //keyboard hiding
                 keyboardController?.hide()
-                handleForgetPassword(context, fEmail, navController)
+               // handleForgetPasswordMail(context, fEmail)
                 /*if (isLoginEnabled) {
                     // Perform login action
                 }
 
                  */
+                if (password.value != confirmpassword.value)
+                    Toast.makeText(context, "The passwords do not match. Try again.", Toast.LENGTH_SHORT).show()
 
-
-
+                else
+                    handleNewPassword(navController,context, password, resetToken.toString())
 
 
             },
@@ -185,15 +190,15 @@ fun ForgotPasswordScreen(navController: NavHostController, modifier: Modifier = 
                 .padding(end = 25.dp)
                 .padding(start = 25.dp)
                 .background(
-                  color = colorResource(R.color.signupdeg),
-                          shape = MaterialTheme.shapes.small
+                    color = colorResource(R.color.signupdeg),
+                    shape = MaterialTheme.shapes.small
 
                 ),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             //enabled = isLoginEnabled,
             contentPadding = PaddingValues()
         ) {
-            Text("Send mail", fontSize = 20.sp, color = colorResource(R.color.passback))
+            Text("Change password", fontSize = 20.sp, color = colorResource(R.color.passback))
         }
         Spacer(modifier = Modifier.weight(1f))
 
@@ -201,18 +206,18 @@ fun ForgotPasswordScreen(navController: NavHostController, modifier: Modifier = 
     }
 }
 
-
-fun handleForgetPassword(context: Context, fEmail: MutableState<String>, navController:NavHostController) {
+fun handleNewPassword(navController: NavHostController, context: Context, password: MutableState<String>, resetToken: String) {
 
     RetrofitInstance.getRetrofit().create(UserAPI::class.java)
-        .forgetPassword(ForgotPasswordDto( email = fEmail.value))
+        .resetPassword(ResetPasswordDto( resetToken = resetToken, newPassword = password.value ))
         .enqueue(object : Callback<Message> {
             override fun onResponse(call: Call<Message>, response: Response<Message>) {
                 if (response.isSuccessful) {
                     // Get the message from the response body
                     val message = response.body()?.message ?: "Unexpected response"
+
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    navController.navigate("forgotPasswordMail")
+                    navController.navigate("login")
                 } else {
                     // Handle error message
                     val errorMsg = response.errorBody()?.string() ?: "An error occurred"
@@ -233,9 +238,9 @@ fun handleForgetPassword(context: Context, fEmail: MutableState<String>, navCont
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewForgotPasswordScreen() {
+fun PreviewNewPassword() {
     val navController = rememberNavController()
 
 
-    ForgotPasswordScreen(navController)
+    NewPassword(navController, resetToken = "")
 }
