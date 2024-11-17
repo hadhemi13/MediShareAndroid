@@ -1,4 +1,4 @@
-package com.example.medishareandroid.user
+package com.example.medishareandroid.views
 
 
 import android.content.Context

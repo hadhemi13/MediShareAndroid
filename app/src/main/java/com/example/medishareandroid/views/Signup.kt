@@ -1,4 +1,4 @@
-package com.example.medishareandroid.user
+package com.example.medishareandroid.views
 
 import android.content.Context
 import android.widget.Toast
@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
-import com.example.medishareandroid.models.User
+import com.example.medishareandroid.models.SignupRequest
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.UserAPI
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
@@ -95,7 +95,10 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
             .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(colorResource(R.color.passback),colorResource(R.color.passback)), // Dégradé du blanc au bleu
+                    colors = listOf(
+                        colorResource(R.color.passback),
+                        colorResource(R.color.passback)
+                    ), // Dégradé du blanc au bleu
                     start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -114,7 +117,10 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
         Image(
             painter = painterResource(R.drawable.logo),
             contentDescription = "background",
-            modifier = Modifier.padding(10.dp).padding(top = 20.dp).size(140.dp)
+            modifier = Modifier
+                .padding(10.dp)
+                .padding(top = 20.dp)
+                .size(140.dp)
         )
         Text(
             text = "Welcome to",
@@ -198,10 +204,6 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
                 )
             }
         }
-
-
-
-
 
         OutlinedTextField(
             value = useremail.value,
@@ -317,7 +319,8 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp).padding(end = 25.dp),
+                .padding(start = 25.dp)
+                .padding(end = 25.dp),
 
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -344,9 +347,11 @@ fun Signup(navController: NavController,modifier: Modifier = Modifier ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(start = 25.dp).padding(end = 25.dp)
+                .padding(10.dp)
+                .padding(start = 25.dp)
+                .padding(end = 25.dp)
                 .background(
-color = colorResource(R.color.sign),
+                    color = colorResource(R.color.sign),
                     shape = MaterialTheme.shapes.small
                 )
         ) {
@@ -358,7 +363,7 @@ color = colorResource(R.color.sign),
                     validateInputs()
                     if (usernameError.value.isEmpty() && useremailError.value.isEmpty() &&
                         passwordError.value.isEmpty() && confirmPasswordError.value.isEmpty() && isChecked.value
-                    ) {        handleNavigationsign(context, username,useremail, password)
+                    ) {        handleNavigationsign(context, username,useremail, password, navController)
 
                     } else {
                         Toast.makeText(context, "Please correct the errors", Toast.LENGTH_SHORT).show()
@@ -382,7 +387,9 @@ color = colorResource(R.color.sign),
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(start = 25.dp).padding(end = 25.dp)
+                .padding(10.dp)
+                .padding(start = 25.dp)
+                .padding(end = 25.dp)
                 .background(
                     color = colorResource(R.color.signupdegg),
                     shape = MaterialTheme.shapes.small
@@ -424,7 +431,8 @@ color = colorResource(R.color.sign),
             textDecoration = TextDecoration.Underline,
 
             modifier = Modifier
-                .padding(20.dp).padding(bottom = 15.dp)
+                .padding(20.dp)
+                .padding(bottom = 15.dp)
                 .clickable {
                     navController.navigate("login")
                 },
@@ -502,14 +510,15 @@ fun PasswordField(
 }
 
 
-fun handleNavigationsign(context: Context ,username : MutableState<String>,useremail: MutableState<String>, password: MutableState<String>) {
+fun handleNavigationsign(context: Context ,username : MutableState<String>,useremail: MutableState<String>, password: MutableState<String>, navController: NavController) {
 
-    RetrofitInstance.getRetrofit().create(UserAPI::class.java).signupUser(User(name = username.value,email = useremail.value, password = password.value )).enqueue(object :
+    RetrofitInstance.getRetrofit().create(UserAPI::class.java).signupUser(SignupRequest(name = username.value ,email = useremail.value, password = password.value )).enqueue(object :
         Callback<Void> {
         override fun onResponse(call: Call<Void>, response: Response<Void>) {
-            if (response.isSuccessful)
-            //navController.navigate("news")
+            if (response.isSuccessful) {
                 Toast.makeText(context, "connection success", Toast.LENGTH_SHORT).show()
+                navController.navigate("login")
+            }
 
             else
             //Toast.makeText(navController.context, response.errorBody()!!.string(), Toast.LENGTH_SHORT).show()

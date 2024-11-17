@@ -1,5 +1,5 @@
 //user/LoginScreen.kt
-package com.example.medishareandroid.user
+package com.example.medishareandroid.views
 
 import android.content.Context
 import android.widget.Toast
@@ -42,9 +42,9 @@ import androidx.compose.ui.Modifier
 //import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
+//import androidx.compose.ui.geometry.Offset
 //import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.graphics.Brush
+//import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
@@ -70,20 +71,23 @@ import com.example.medishareandroid.models.LoginRequest
 import com.example.medishareandroid.models.User
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.UserAPI
+import com.example.medishareandroid.repositories.PreferencesRepository
+import com.example.medishareandroid.viewModels.AuthViewModel
+import com.example.medishareandroid.viewModels.AuthViewModelFactory
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
 
-fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier) {
+fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier, onLoginClick: () -> Unit) {
     //tates for Username and Password
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
-    val myFontFamily = FontFamily(
+    /*val myFontFamily = FontFamily(
         Font(R.font.itimregular), // Remplacez par le nom de votre fichier de police
-    )
+    )*/
     val mediFontFamily = FontFamily(
         Font(R.font.chewyregular), // Remplacez par le nom de votre fichier de police
     )
@@ -97,7 +101,6 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
 //keyboardController allow manually show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
 //val isLoginEnabled = username.value.isNotBlank() && password.value.isNotBlank()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -255,6 +258,10 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                 focusedContainerColor = Color.Transparent
             )
         )
+
+
+
+
         Row {
 
 
@@ -322,7 +329,8 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                     focusManager.clearFocus()
                     //keyboard hiding
                     keyboardController?.hide()
-                    handleNavigation(context, email, password)
+                    handleNavigation(context, email, password,navController){onLoginClick()}
+
                     /*if (isLoginEnabled) {
                         // Perform login action
                     }
@@ -419,39 +427,61 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
 fun handleNavigation(
     context: Context,
     email: MutableState<String>,
-    password: MutableState<String>
+    password: MutableState<String>,
+    navController: NavHostController,
+    onLoginClick: () -> Unit
 ) {
+    val userAPI = RetrofitInstance.getRetrofit().create(UserAPI::class.java)
+    val loginRequest = LoginRequest(email = email.value, password = password.value)
 
-    RetrofitInstance.getRetrofit().create(UserAPI::class.java)
-        .login(LoginRequest(email = email.value, password = password.value))
-        .enqueue(object : Callback<User> {
-            override fun onResponse(call: Call<User>, response: Response<User>) {
-                if (response.isSuccessful)
-                //navController.navigate("news")
-                    Toast.makeText(context, "connection success", Toast.LENGTH_SHORT).show()
-                else
-                //Toast.makeText(navController.context, response.errorBody()!!.string(), Toast.LENGTH_SHORT).show()
-                    Toast.makeText(context, response.errorBody()!!.string(), Toast.LENGTH_SHORT)
-                        .show()
+    userAPI.login(loginRequest).enqueue(object : Callback<User> {
+        override fun onResponse(call: Call<User>, response: Response<User>) {
+            if (response.isSuccessful && response.body() != null) {
+                val user = response.body()!!
 
+                // Instanciation de PreferencesRepository pour stocker les informations de l'utilisateur
+                val preferencesRepository = PreferencesRepository(context)
+                preferencesRepository.setName(user.userName)
+                preferencesRepository.setEmail(user.userEmail)
+                preferencesRepository.setId(user.userId )
+                preferencesRepository.setToken(user.accessToken)
+                preferencesRepository.setToken(user.refreshToken)
+
+                Toast.makeText(context, "Connection successful", Toast.LENGTH_SHORT).show()
+
+                // Appel de la fonction onLoginClick après succès de connexion
+                onLoginClick()
+
+                // Navigation vers la page d'accueil
+                navController.navigate("homePage") {
+                    popUpTo("loginPage") { inclusive = true } // Retirer la page de login de la pile
+                }
+            } else {
+                val errorMessage = response.errorBody()?.string() ?: "Login failed"
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
             }
+        }
 
-            override fun onFailure(call: Call<User>, t: Throwable) {
-                Toast.makeText(context, t.message, Toast.LENGTH_SHORT).show()
-
-            }
-
-        })
+        override fun onFailure(call: Call<User>, t: Throwable) {
+            Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+        }
+    })
 }
+
 
 
 @Preview(showBackground = true)
 @Composable
 fun LoginPreviaw() {
+
+    val context = LocalContext.current
+
+    val preferencesRepository = PreferencesRepository(context)
     val navController = rememberNavController()
-
-
-    LoginScreen(navController)
+    val viewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(preferencesRepository)
+    )
+    LoginScreen(navController){viewModel.loginUser()}
 
 
 }

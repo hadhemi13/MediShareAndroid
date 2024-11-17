@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -50,6 +52,8 @@ android {
 }
 
 dependencies {
+    val room_version = "2.6.1"
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -65,6 +69,10 @@ dependencies {
 
     //nav controller
     implementation("androidx.navigation:navigation-compose:2.8.3")
+    //room
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -73,6 +81,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
 
 }

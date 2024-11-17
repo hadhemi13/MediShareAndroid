@@ -1,6 +1,15 @@
 //models/User.kt
 package com.example.medishareandroid.models
 
-data class User( val name: String,
-                 val email: String,
-                 val password: String)
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class User(
+    @PrimaryKey
+    val userId:String,
+    val userName: String,
+    val userEmail: String,
+    val accessToken: String,
+    val refreshToken: String
+)
