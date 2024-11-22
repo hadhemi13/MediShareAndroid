@@ -63,10 +63,15 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation ("androidx.compose.material:material:1.5.0") // Use the latest version
+
+    implementation("io.coil-kt.coil3:coil-compose:3.0.3") // Use the latest version
+
     //retrofit import
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
     //nav controller
     implementation("androidx.navigation:navigation-compose:2.8.3")
     //room

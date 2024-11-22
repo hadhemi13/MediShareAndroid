@@ -1,8 +1,6 @@
 package com.example.medishareandroid.views
 
 
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,10 +29,9 @@ fun ChangePasswordScreen(
 ) {
     val context = LocalContext.current
     val factory = SettingsViewModelFactory(preferencesRepository)
+//
     val viewModel =
-        ViewModelProvider(context as androidx.lifecycle.ViewModelStoreOwner, factory).get(
-            SettingsViewModel::class.java
-        )
+        ViewModelProvider(context as androidx.lifecycle.ViewModelStoreOwner, factory)[SettingsViewModel::class.java]
 
     val oldPassword = remember { mutableStateOf("") }
     val newPassword = remember { mutableStateOf("") }

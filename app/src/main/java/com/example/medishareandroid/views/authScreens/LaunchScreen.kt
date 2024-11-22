@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.viewModels.AuthViewModel
-import com.example.medishareandroid.views.HomeScreen
 import kotlinx.coroutines.delay
 
 class LaunchScreen : ComponentActivity() {

@@ -12,9 +12,12 @@ import androidx.compose.material3.ButtonDefaults
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
 import com.example.medishareandroid.models.User
 import com.example.medishareandroid.remote.RetrofitInstance
@@ -117,4 +120,11 @@ fun updateUserProfile(
             Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
         }
     })
+}
+@Preview(showBackground = true)
+@Composable
+fun EditProfileScreenPreview(){
+    val context= LocalContext.current
+    val navController = rememberNavController()
+    EditProfileScreen(context, navController)
 }

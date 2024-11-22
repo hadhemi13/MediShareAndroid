@@ -1,5 +1,5 @@
 //user/LoginScreen.kt
-package com.example.medishareandroid.views
+package com.example.medishareandroid.views.authScreens
 
 import android.content.Context
 import android.widget.Toast

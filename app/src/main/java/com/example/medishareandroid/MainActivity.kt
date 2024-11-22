@@ -23,13 +23,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
-import com.example.medishareandroid.views.Signup
+import com.example.medishareandroid.views.authScreens.Signup
 
 
-import com.example.medishareandroid.views.ForgotPasswordScreen
-import com.example.medishareandroid.views.LoginScreen
-import com.example.medishareandroid.views.NewPassword
-import com.example.medishareandroid.views.RecoveryCodeSceen
+import com.example.medishareandroid.views.authScreens.ForgotPasswordScreen
+import com.example.medishareandroid.views.authScreens.LoginScreen
+import com.example.medishareandroid.views.authScreens.NewPassword
+import com.example.medishareandroid.views.authScreens.RecoveryCodeSceen
 import com.example.medishareandroid.viewModels.AuthViewModel
 import com.example.medishareandroid.viewModels.AuthViewModelFactory
 import com.example.medishareandroid.views.EditProfileScreen
