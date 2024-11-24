@@ -66,7 +66,7 @@ dependencies {
     implementation ("androidx.compose.material:material:1.5.0") // Use the latest version
 
     implementation("io.coil-kt.coil3:coil-compose:3.0.3") // Use the latest version
-
+    implementation ("androidx.compose.runtime:runtime-livedata:1.7.5")
     //retrofit import
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

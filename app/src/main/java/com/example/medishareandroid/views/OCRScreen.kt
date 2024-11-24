@@ -40,6 +40,7 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import okio.BufferedSink
 import okio.source
 import java.io.InputStream
@@ -49,7 +50,14 @@ import androidx.compose.material3.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -67,6 +75,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.example.medishareandroid.R
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.OCRViewModel
+import com.example.medishareandroid.views.components.ProfileOptionCard
 import java.io.FileOutputStream
 
 @Composable
@@ -98,18 +107,20 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(16.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        // Image picker section
         Box(
             contentAlignment = Alignment.BottomEnd,
-            modifier = Modifier
+            modifier = Modifier.padding(top = 100.dp)
                 .size(100.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
         ) {
+
+
             Image(
                 painter = painter,
                 contentDescription = "Profile Picture",
@@ -134,11 +145,11 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
         Text("OCR API Demo", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
         // Display user ID
-        Text(
-            text = "User ID: $userId",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(8.dp)
-        )
+//        Text(
+//            text = "User ID: $userId",
+//            fontSize = 16.sp,
+//            modifier = Modifier.padding(8.dp)
+//        )
 
         // Image name input
         BasicTextField(
@@ -150,16 +161,6 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
             decorationBox = { innerTextField -> innerTextField() },
             singleLine = true
         )
-
-        Button(onClick = {
-            viewModel.analyzeImage(imageUri.value) {
-                result = it?.toString() ?: "Error analyzing image"
-            }
-        }) {
-            Text("Analyze Image")
-        }
-
-        Spacer(Modifier.height(16.dp))
 
         // File path input
         BasicTextField(
@@ -177,19 +178,58 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
 
         Spacer(Modifier.height(16.dp))
 
-        // Upload button
-        Button(onClick = {
-            viewModel.uploadFile(uploadFilePath.text, userId!!, context)
-        }) {
-            Text("Upload File")
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        // Display result
+        // Result display
         Text("Result: $result")
+
+        // Spacer to push the buttons to the bottom
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Bottom buttons section
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        ) {
+//            Button(onClick = {
+//                viewModel.analyzeImage(imageUri.value) {
+//                    result = it?.toString() ?: "Error analyzing image"
+//                }
+//            }) {
+//                Text("Analyze Image")
+//            }
+
+//            Button(onClick = {
+//                viewModel.uploadFile(uploadFilePath.text, userId!!, context)
+//            }) {
+//                Text("Upload File")
+//            }
+            ProfileOptionCard(
+                icon = Icons.Default.Image,
+                label = "Find Image",
+                onClick = {  launcher.launch("image/*")}
+            )
+            ProfileOptionCard(
+                icon = Icons.Default.Analytics,
+                label = "Analyze Image",
+                onClick = {  viewModel.analyzeImage(imageUri.value) {
+                    result = it?.toString() ?: "Error analyzing image"
+                } }
+            )
+            ProfileOptionCard(
+                icon = Icons.Default.UploadFile,
+                label = "Upload File",
+                onClick = { viewModel.uploadFile(uploadFilePath.text, userId!!, context) }
+            )
+        }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun OCRScreenPreview() {
+    OCRScreen()
+}
+
 
 // Helper function to get the path from URI (Updated for content:// URIs)
 fun getPathFromUri(context: Context, uri: Uri): String {

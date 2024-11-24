@@ -25,7 +25,7 @@ interface OcrAPI{
     fun uploadFile(
         @Part file: MultipartBody.Part,
         @Part("userId") userId: RequestBody // Ensure userId is passed as a RequestBody
-    ): Call<OCRResponse>
+    ): Call<OCR1Response>
    /* @Multipart
     @POST("upload")
     suspend fun uploadFile(
@@ -34,8 +34,10 @@ interface OcrAPI{
     ): OCRResponse
 
 */
+
     @POST("files/getAllImages")
-    suspend fun getAllImages(@Body userId: Map<String, String>): Response<List<Map<String, Any>>>
+    fun getAllImages(@Body getOCRReq: GetOCRReq): Call<List<OCRResponse>>
+
 
     @POST("files/getImageDetails")
     suspend fun getImageDetails(@Body imageId: Map<String, String>): Response<Map<String, Any>>
@@ -43,12 +45,52 @@ interface OcrAPI{
 
 
 
-data class OCRResponse(
+data class OCR1Response(
     val message: String,
     val filePath: String
    // val extractedData: Map<String, Any>? = null
 )
-data class OCRReq(
+data class OCR1Req(
     val file:File,
     val userId:String
+)
+
+
+
+data class OCRResponse(
+    val _id: String,
+    val userId: String,
+    val error: String? = null,
+    val details: String? = null,
+    val image_name: String,
+    val patient_name: String? = null,
+    val date: String? = null,
+    val prescription: List<PrescriptionItem>? = null,
+    val doctor: String? = null,
+    val doctor_title: String? = null,
+    val patient: Patient? = null,
+    val prescription_title: String? = null,
+    val items: List<PrescriptionItem>? = null,
+    val tabs: List<Tab>? = null,
+    val title: String? = null,
+    val __v: Int
+)
+
+data class PrescriptionItem(
+    val activity: String,
+    val frequency: String,
+    val location: String? = null
+)
+
+data class Patient(
+    val name: String,
+    val date: String
+)
+
+data class Tab(
+    val name: String
+)
+
+data class GetOCRReq(
+    val id: String
 )
