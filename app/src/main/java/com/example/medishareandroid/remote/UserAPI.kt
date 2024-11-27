@@ -14,26 +14,26 @@ import retrofit2.http.Path
 
 
 interface UserAPI {
-    @POST("/auth/login")
+    @POST("auth/login")
     fun login(@Body user: LoginRequest): Call<User>
 
-    @POST("/auth/signup") // Change this to your actual signup endpoint
+    @POST("auth/signup") // Change this to your actual signup endpoint
     fun signupUser(@Body user: SignupRequest): Call<Void>
 
-    @POST("/auth/forgot-password")
+    @POST("auth/forgot-password")
     fun forgetPassword(@Body forgotPasswordDto: ForgotPasswordDto): Call<Message>
 
-    @POST("/auth/verify-otp")
+    @POST("auth/verify-otp")
     fun verifyOtp(@Body verifyOtpDto: VerifyOtpDto): Call<ResetToken>
 
-    @PUT("/auth/reset-password")
+    @PUT("auth/reset-password")
     fun resetPassword(@Body resetPasswordDto: ResetPasswordDto): Call<Message>
 
-    @PATCH("/user/{id}")
+    @PATCH("user/{id}")
     fun editProfile(@Path("id") id: String, @Body editProfileDto: EditProfileDto): Call<User>
 
 
-    @PUT("/auth/change-password")
+    @PUT("auth/change-password")
     fun changePassword(@Body changePasswordDto: ChangePasswordDto): Call<StatusCode>
     //@GET("auth/google/callback")
 }

@@ -31,10 +31,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 
-class OCRViewModel : ViewModel() {}
+class OCRViewModel : ViewModel() {
 
 
-    /*val api = RetrofitInstance.getRetrofit().create(OcrAPI::class.java)
+    val api = RetrofitInstance.getRetrofit().create(OcrAPI::class.java)
     fun analyzeImage(imageName: String, onResult: (Map<String, Any>?) -> Unit) {
         viewModelScope.launch {
             val response = api.analyzeImage(imageName)
@@ -200,5 +200,4 @@ class OCRViewModel : ViewModel() {}
         })
     }
 }
-*/
-*/
+

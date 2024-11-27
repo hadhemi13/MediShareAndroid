@@ -32,9 +32,9 @@ import com.example.medishareandroid.repositories.PreferencesRepository
 
 
 @Composable
-fun FolderScreen(navController: NavController, viewModel: OCRViewModel = viewModel()) {}
+fun FolderScreen(navController: NavController, viewModel: OCRViewModel = viewModel()) {
     // Observe LiveData
-   /* val context = LocalContext.current
+    val context = LocalContext.current
     val prefs = PreferencesRepository(context)
     val ocrResponses by viewModel.ocrResponses.observeAsState(emptyList())
     val error by viewModel.error.observeAsState("")
@@ -129,4 +129,3 @@ fun PreviewFolderScreen() {
     // FolderScreen composable with mocked viewModel
     FolderScreen(navController = rememberNavController(), viewModel = OCRViewModel())
 }
-*/

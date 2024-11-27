@@ -11,9 +11,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Brightness2
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +37,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
+import com.example.medishareandroid.viewModels.SettingsViewModel
 import com.example.medishareandroid.views.components.ProfileOptionCard
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.asImageBitmap
 
 
 @Composable
@@ -43,8 +48,14 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
     val context= LocalContext.current
     val prefs = PreferencesRepository(context)
     var isDarkMode by remember { mutableStateOf(false) }
+    val viewModel = SettingsViewModel(prefs)
     //var showChangePasswordPopup by remember { mutableStateOf(false) }
 
+    // Observe QR Code bitmap from ViewModel
+    val qrCodeBitmap by viewModel.qrCodeBitmap.collectAsState()
+    LaunchedEffect (prefs.getId().toString()) {
+        viewModel.fetchQrCode(prefs.getId().toString(),context)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,6 +108,20 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        //qrCode
+        Box(modifier = Modifier.height(350.dp).fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+            qrCodeBitmap?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = "User Medical Files QR Code",
+                    modifier = Modifier.size(200.dp)
+                )
+            } ?: CircularProgressIndicator()
+        }
+
 
         Spacer(modifier = Modifier.height(10.dp))
 

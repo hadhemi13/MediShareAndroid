@@ -1,18 +1,13 @@
 package com.example.medishareandroid.viewModels
 
-import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.medishareandroid.remote.ChangePasswordDto
-import com.example.medishareandroid.remote.Message
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.StatusCode
 import com.example.medishareandroid.remote.UserAPI
@@ -21,14 +16,25 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlinx.coroutines.flow.MutableStateFlow
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import com.example.medishareandroid.remote.OcrAPI
+import com.example.medishareandroid.remote.QrResponse
+import kotlinx.coroutines.flow.StateFlow
+
+
+
 
 class SettingsViewModel(private val preferencesRepository: PreferencesRepository) :ViewModel() {
     private val _passwordUpdated = mutableStateOf(false)
-
+    private val _qrCodeBitmap = MutableStateFlow<Bitmap?>(null)
+    val qrCodeBitmap: StateFlow<Bitmap?> = _qrCodeBitmap
 
     // MutableLiveData for the UI state
-    val userName = MutableLiveData<String?>()
-    val userEmail = MutableLiveData<String?>()
+    //val userName = MutableLiveData<String?>()
+    //val userEmail = MutableLiveData<String?>()
 
     // Méthode pour modifier l'état "passwordUpdated" pour afficher un message ou modifier l'UI
     fun setPasswordUpdated(updated: Boolean) {
@@ -75,9 +81,52 @@ class SettingsViewModel(private val preferencesRepository: PreferencesRepository
             }
 
             override fun onFailure(call: Call<StatusCode>, t: Throwable) {
-                Toast.makeText(context, t.message.toString() ?: "Network failure", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, t.message.toString(), Toast.LENGTH_SHORT).show()
                 Log.d("SettingsViewModel", "Failed to update password", t)
             }
         })
     }
+
+    //qr
+    fun fetchQrCode(userId: String, context: Context) {
+        viewModelScope.launch {
+            val ocrApi = RetrofitInstance.getRetrofit().create(OcrAPI::class.java)
+
+            ocrApi.getQrCode(userId).enqueue(object : Callback<QrResponse> {
+                override fun onResponse(call: Call<QrResponse>, response: Response<QrResponse>) {
+                    if (response.isSuccessful) {
+                        // Get the message from the response body
+                        val message = response.body()?: "Password updated successfully"
+                        Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show()
+                        try {
+
+                            val decodedBytes = Base64.decode(response.body()?.qrCode.toString().split(",")[1], Base64.DEFAULT)
+                            val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                            _qrCodeBitmap.value = bitmap
+                        } catch (e: Exception) {
+                            // Handle errors if needed
+                            _qrCodeBitmap.value = null
+                        }
+
+                    } else {
+                        // Handle error message
+
+                        val errorMsg = response.errorBody()?.string() ?: "An error occurred"
+                        Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                        Log.d("SettingsViewModel", errorMsg)
+                    }
+                }
+
+                override fun onFailure(call: Call<QrResponse>, t: Throwable) {
+                    Toast.makeText(context, t.message.toString(), Toast.LENGTH_SHORT).show()
+                    Log.d("SettingsViewModel", "Failed to update password", t)
+
+                }
+            })
+
+        }
+    }
+
+
+
 }
