@@ -1,5 +1,6 @@
 package com.example.medishareandroid.views.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,14 +42,17 @@ fun ProfileOptionCard(
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
+            .background(Color(0xFFF9F9F9)) // Apply the F9F9F9 background color
             .clickable(enabled = onClick != null) { onClick?.invoke() }
             .height(60.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(Color.White)
+        colors = CardDefaults.cardColors(Color(0xFFF9F9F9)) // Card content background is white
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp)
+                .background(Color(0xFFF9F9F9)) // Set the background color
+            ,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -74,27 +78,6 @@ fun ProfileOptionCard(
                     modifier = Modifier.size(24.dp)
                 )
             }
-        }
-    }
-}
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSettingsScreen() {
-    var isDarkMode by remember { mutableStateOf(false) }
-
-    MaterialTheme {
-        Surface  { ProfileOptionCard(icon = Icons.Outlined.Brightness2,
-            label = "Dark mode",
-            trailingContent = {
-                Switch(
-                    checked = isDarkMode,
-                    onCheckedChange = { isDarkMode = it }
-                )
-            })
         }
     }
 }
