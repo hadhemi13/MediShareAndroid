@@ -1,7 +1,10 @@
 package com.example.medishareandroid.views
 
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +26,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,8 +41,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.medishareandroid.R
 import com.example.medishareandroid.remote.RecReq
 import com.example.medishareandroid.remote.Recommendation
@@ -67,7 +76,7 @@ fun HomeScreen(navController2: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
 
-            composable("home") { ScreenContent("Home") }
+            composable("home") { ExactDesignScreen(navController) }
             composable("search") { ScreenContent("Search") }
             composable("profile") { ProfileScreen(viewModel, navController) }
             composable("editProfileScreen") {
@@ -79,9 +88,18 @@ fun HomeScreen(navController2: NavController) {
             composable("changePassword") {
                 ChangePasswordScreen(navController, preferencesRepository)
             }
-            composable("ocr"){
-               // PhotosView()
-                OCRScreen()
+            composable(
+                route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",
+                arguments = listOf(
+                    navArgument("filePath") { type = NavType.StringType },
+                    navArgument("imageUri") { type = NavType.StringType }
+                )
+            ) {
+                // Pass arguments to the composable
+                OCRScreen(
+                    uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
+                    imageUri1 = it.arguments?.getString("imageUri") ?: ""
+                )
             }
             composable("folder") {
                 FolderScreen(navController,modifier=Modifier.padding(innerPadding))
@@ -93,6 +111,13 @@ fun HomeScreen(navController2: NavController) {
 
                 OcrItemScreen(imageName = imageName, title)
             }
+            composable("recommendationItem/{title}/{desc}"){
+                    backStackEntry ->
+                // Retrieve the imageName argument
+                val desc = backStackEntry.arguments?.getString("desc") ?: "No desc"
+                val title = backStackEntry.arguments?.getString("title") ?: "No title"
+
+                RecommandationScreen(title = title, description = desc)}
 
         }
     }
@@ -208,17 +233,39 @@ fun BottomNavigationBar(navController: NavController) {
     )
 
     NavigationBar(containerColor = Color.White) {
-        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+        val context= LocalContext.current
 
+        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+        var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
+        val imageUri = rememberSaveable { mutableStateOf("") }
+
+        val launcher = rememberLauncherForActivityResult (
+            contract = ActivityResultContracts.GetContent()
+        ) { uri: Uri? ->
+            uri?.let {
+                imageUri.value = it.toString()
+
+                // Extract the file path from the URI and save it to uploadFilePath
+                val path = getPathFromUri(context, it)
+                uploadFilePath = TextFieldValue(path) // Update the global path
+                val destination = "ocr_screen?filePath=${uploadFilePath.text}&imageUri=${Uri.encode(imageUri.value)}"
+                navController.navigate(destination)
+
+            }
+        }
         items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },
                 selected = currentDestination?.route == item.route,
                 onClick = {
+                    if(item.route.equals("ocr")){
+                        launcher.launch("image/*")
+                    }
+                    else{
                     navController.navigate(item.route) {
                         popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                        launchSingleTop = true}
                     }
                 },
                 colors = NavigationBarItemColors(

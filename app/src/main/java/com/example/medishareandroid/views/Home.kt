@@ -1,13 +1,17 @@
 package com.example.medishareandroid.views
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.filled.Favorite
@@ -19,12 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +40,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
+import com.example.medishareandroid.remote.RecReq
+import com.example.medishareandroid.remote.Recommendation
+import com.example.medishareandroid.remote.RecommendationApi
+import com.example.medishareandroid.remote.ReqRes
+import com.example.medishareandroid.remote.RetrofitInstance
+import com.example.medishareandroid.repositories.PreferencesRepository
+import com.example.medishareandroid.viewModels.HomeViewModel
+import retrofit2.Call
 
 @Composable
 fun ExactDesignScreen(navController: NavController) {
@@ -42,6 +56,7 @@ fun ExactDesignScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF9F9F9)) // Light background for the page
+            .verticalScroll(rememberScrollState()),
     ) {
         // Blue header with user information
         BlueHeader()
@@ -65,7 +80,7 @@ fun ExactDesignScreen(navController: NavController) {
         SectionTitle("Recommendations" , navController)
         Spacer(modifier = Modifier.height(15.dp))
 
-        RecommendationsSection()
+        RecommendationsSection(navController)
     }
 }
 @Composable
@@ -310,7 +325,38 @@ fun ClinicsAndRadiologistsList() {
 }
 
 @Composable
-fun RecommendationsSection() {
+fun RecommendationsSection(navController: NavController) {
+    val viewModel = HomeViewModel()
+    val clinics = viewModel.clinics // Obtenir les données des cliniques
+    val context = LocalContext.current
+    val preferencesRepository = PreferencesRepository(context)
+
+    // État pour les recommandations
+    val recommendations = remember { mutableStateOf<List<Recommendation>>(emptyList()) }
+
+    // Effectuer un appel réseau pour récupérer les recommandations
+    LaunchedEffect(Unit) {
+        val api = RetrofitInstance.getRetrofit().create(RecommendationApi::class.java)
+        api.fetchRecommendations(RecReq(preferencesRepository.getId()!!))
+            .enqueue(object : retrofit2.Callback<ReqRes> {
+                override fun onResponse(call: Call<ReqRes>, response: retrofit2.Response<ReqRes>) {
+                    if (response.isSuccessful) {
+                        val recommendationsList = response.body()?.data
+                        if (recommendationsList.isNullOrEmpty()) {
+                            Toast.makeText(context, "No recommendations found", Toast.LENGTH_SHORT).show()
+                        } else {
+                            recommendations.value = recommendationsList
+                        }
+                    } else {
+                        Toast.makeText(context, "Failed to load recommendations", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ReqRes>, t: Throwable) {
+                    Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -318,12 +364,18 @@ fun RecommendationsSection() {
         horizontalArrangement = Arrangement.spacedBy(16.dp) // Adds spacing between cards
     ) {
         // Each item inside the LazyRow will be a RecommendationsCard
-        items(5) { // Adjust the number of items based on your data
+        /*items(5) { // Adjust the number of items based on your data
             RecommendationsCard(
                 title = "Improved Patient Care",
                 description = "Innovative solutions for better healthcare."
             )
+
+        }*/
+        items(recommendations.value.size) { index ->
+            RecommendationsCard(title = recommendations.value[index].title, description = recommendations.value[index].content, navController)
         }
+
+
     }
 }
 
@@ -397,7 +449,8 @@ fun RadiologistCard(
 @Composable
 fun RecommendationsCard(
     title: String,
-    description: String
+    description: String,
+    navController: NavController
 ) {
     // Card design with rounded corners, padding, and background color
     Box(
@@ -406,6 +459,11 @@ fun RecommendationsCard(
             .height(120.dp)
             .background(Color.White, RoundedCornerShape(16.dp))
             .padding(10.dp)
+            .clickable {
+
+                navController.navigate("recommendationItem/${title}/${description}")
+
+            }
     ) {
         Column {
             // Card Header (Title and Description with Icon)

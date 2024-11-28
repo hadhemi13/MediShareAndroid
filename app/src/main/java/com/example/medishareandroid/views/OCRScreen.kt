@@ -81,20 +81,20 @@ import com.example.medishareandroid.views.components.ProfileOptionCard
 import java.io.FileOutputStream
 
 @Composable
-fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
+fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel = viewModel()) {
     val context = LocalContext.current
     val prefs = PreferencesRepository(context)
     val userId = prefs.getId() // Immutable user ID
     var imageName by remember { mutableStateOf(TextFieldValue("")) }
-    var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
+    var uploadFilePath by remember { mutableStateOf(TextFieldValue(uploadFilePath1)) }
     var result by remember { mutableStateOf("") }
 
-    val imageUri = rememberSaveable { mutableStateOf("") }
+    val imageUri = rememberSaveable { mutableStateOf(imageUri1) }
     val painter = rememberAsyncImagePainter(
         model = imageUri.value.ifEmpty { R.drawable.profile_image }
     )
 
-    val launcher = rememberLauncherForActivityResult(
+    /*val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
@@ -106,7 +106,7 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
         }
     }
 
-
+*/
 
     Column(
         modifier = Modifier
@@ -138,9 +138,9 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
                     .size(30.dp)
                     .clip(CircleShape)
                     .background(Color.White)
-                    .clickable {
-                        launcher.launch("image/*")
-                    }
+                    //.clickable {
+                     //   launcher.launch("image/*")
+                    //}
                     .padding(4.dp)
             )
         }
@@ -207,11 +207,14 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
 //            }) {
 //                Text("Upload File")
 //            }
-            ProfileOptionCard(
+            /*ProfileOptionCard(
                 icon = Icons.Default.Image,
                 label = "Find Image",
-                onClick = {  launcher.launch("image/*")}
-            )
+                onClick = {
+                    //launcher.launch("image/*")*/
+
+                }
+            )*/
             ProfileOptionCard(
                 icon = Icons.Default.Analytics,
                 label = "Analyze Image",
@@ -231,7 +234,7 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun OCRScreenPreview() {
-    OCRScreen()
+    OCRScreen("","")
 }
 
 
