@@ -1,11 +1,8 @@
 package com.example.medishareandroid.viewModels
 
-import android.content.Context
-import android.util.Log
+
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.medishareandroid.remote.ChangePasswordDto
 import com.example.medishareandroid.remote.RetrofitInstance
@@ -13,16 +10,28 @@ import com.example.medishareandroid.remote.StatusCode
 import com.example.medishareandroid.remote.UserAPI
 import com.example.medishareandroid.repositories.PreferencesRepository
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import com.example.medishareandroid.remote.OcrAPI
 import com.example.medishareandroid.remote.QrResponse
 import kotlinx.coroutines.flow.StateFlow
+
+
+// Lifecycle and ViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+
+// Android utilities
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.content.Context
+import android.util.Log
+
+// Network and coroutine dependencies
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 
@@ -30,7 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
 class SettingsViewModel(private val preferencesRepository: PreferencesRepository) :ViewModel() {
     private val _passwordUpdated = mutableStateOf(false)
     private val _qrCodeBitmap = MutableStateFlow<Bitmap?>(null)
-    val qrCodeBitmap: StateFlow<Bitmap?> = _qrCodeBitmap
+    var qrCodeBitmap: StateFlow<Bitmap?> = _qrCodeBitmap
 
     // MutableLiveData for the UI state
     //val userName = MutableLiveData<String?>()
@@ -97,15 +106,19 @@ class SettingsViewModel(private val preferencesRepository: PreferencesRepository
                     if (response.isSuccessful) {
                         // Get the message from the response body
                         val message = response.body()?: "Password updated successfully"
-                        Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show()
                         try {
-
-                            val decodedBytes = Base64.decode(response.body()?.qrCode.toString().split(",")[1], Base64.DEFAULT)
+                            val base64String = response.body()?.qrCode ?: ""
+                            val base64Data = base64String.split(",").getOrNull(1) ?: base64String
+                           // Toast.makeText(context, base64Data, Toast.LENGTH_LONG).show()
+                            val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
                             val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                             _qrCodeBitmap.value = bitmap
+                            qrCodeBitmap=_qrCodeBitmap
                         } catch (e: Exception) {
                             // Handle errors if needed
-                            _qrCodeBitmap.value = null
+                            Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show()
+                           // _qrCodeBitmap.value = null
                         }
 
                     } else {

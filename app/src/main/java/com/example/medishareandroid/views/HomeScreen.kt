@@ -84,8 +84,16 @@ fun HomeScreen(navController2: NavController) {
                 OCRScreen()
             }
             composable("folder") {
-                FolderScreen(navController)
+                FolderScreen(navController,modifier=Modifier.padding(innerPadding))
             }
+            composable("ocrItemScreen/{imageName}/{title}") { backStackEntry ->
+                // Retrieve the imageName argument
+                val imageName = backStackEntry.arguments?.getString("imageName") ?: "No Image"
+                val title = backStackEntry.arguments?.getString("title") ?: "No title"
+
+                OcrItemScreen(imageName = imageName, title)
+            }
+
         }
     }
 }

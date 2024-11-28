@@ -1,5 +1,6 @@
 package com.example.medishareandroid.remote
 
+import android.os.Parcelable
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -12,6 +13,9 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 import java.io.File
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
+
 
 interface OcrAPI {
     @GET("files")
@@ -64,7 +68,7 @@ data class OCR1Req(
     val userId: String
 )
 
-
+@Parcelize
 data class OCRResponse(
     val _id: String,
     val userId: String,
@@ -73,16 +77,16 @@ data class OCRResponse(
     val image_name: String,
     val patient_name: String? = null,
     val date: String? = null,
-    val prescription: List<PrescriptionItem>? = null,
+    val prescription: @RawValue List<PrescriptionItem>? = null,
     val doctor: String? = null,
     val doctor_title: String? = null,
-    val patient: Patient? = null,
+    val patient:  @RawValue Patient? = null,
     val prescription_title: String? = null,
-    val items: List<PrescriptionItem>? = null,
-    val tabs: List<Tab>? = null,
+    val items:  @RawValue List<PrescriptionItem>? = null,
+    val tabs: @RawValue List<Tab>? = null,
     val title: String? = null,
     val __v: Int
-)
+):Parcelable
 
 data class PrescriptionItem(
     val activity: String,

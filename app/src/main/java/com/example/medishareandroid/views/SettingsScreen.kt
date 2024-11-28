@@ -5,8 +5,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
@@ -58,7 +60,8 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
     }
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize().verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
@@ -112,14 +115,17 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
         Spacer(modifier = Modifier.height(10.dp))
 
         //qrCode
-        Box(modifier = Modifier.height(350.dp).fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.size(300.dp).padding(16.dp), contentAlignment = Alignment.Center) {
             qrCodeBitmap?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "User Medical Files QR Code",
-                    modifier = Modifier.size(200.dp)
+
+                Image( bitmap = it.asImageBitmap(),
+                contentDescription = "User Medical Files QR Code",
+                modifier = Modifier.size(200.dp)
                 )
-            } ?: CircularProgressIndicator()
+
+            } ?:
+                CircularProgressIndicator()
+
         }
 
 

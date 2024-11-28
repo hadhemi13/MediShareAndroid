@@ -71,7 +71,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.rememberAsyncImagePainter
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.medishareandroid.R
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.OCRViewModel
@@ -103,6 +105,8 @@ fun OCRScreen(viewModel: OCRViewModel = viewModel()) {
             uploadFilePath = TextFieldValue(path) // Update the global path
         }
     }
+
+
 
     Column(
         modifier = Modifier

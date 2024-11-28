@@ -1,5 +1,6 @@
 package com.example.medishareandroid.views
 
+import android.R
 import android.content.Context
 import com.example.medishareandroid.viewModels.OCRViewModel
 
@@ -7,6 +8,7 @@ import com.example.medishareandroid.viewModels.OCRViewModel
 import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -23,8 +25,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
-import coil3.decode.ImageSource
+import coil.compose.AsyncImage
+//import coil.decode.ImageSource
 import com.example.medishareandroid.remote.BASE_URL
 import com.example.medishareandroid.remote.OCRResponse
 import com.example.medishareandroid.remote.RetrofitInstance
@@ -32,13 +34,17 @@ import com.example.medishareandroid.repositories.PreferencesRepository
 
 
 @Composable
-fun FolderScreen(navController: NavController, viewModel: OCRViewModel = viewModel()) {
+fun FolderScreen(navController: NavController,modifier: Modifier, viewModel: OCRViewModel = viewModel()) {
     // Observe LiveData
     val context = LocalContext.current
     val prefs = PreferencesRepository(context)
     val ocrResponses by viewModel.ocrResponses.observeAsState(emptyList())
     val error by viewModel.error.observeAsState("")
     val isLoading by viewModel.isLoading.observeAsState(false)  // Track loading state
+
+
+
+
     LaunchedEffect(Unit) {
         val userId =  // Replace with the actual user ID
         viewModel.fetchAllImages(prefs.getId()!!, context)
@@ -56,7 +62,7 @@ fun FolderScreen(navController: NavController, viewModel: OCRViewModel = viewMod
                 // Content list
                 LazyColumn {
                     items(ocrResponses) { ocrResponse ->
-                        OCRItem(ocrResponse = ocrResponse, context)
+                        OCRItem(ocrResponse = ocrResponse, context, navController)
                     }
                 }
             }
@@ -65,29 +71,35 @@ fun FolderScreen(navController: NavController, viewModel: OCRViewModel = viewMod
 }
 
 @Composable
-fun OCRItem(ocrResponse: OCRResponse,context:Context) {
- /*  //Toast.makeText(context,BASE_URL+"upload/"+ocrResponse.image_name , Toast.LENGTH_LONG).show()
+fun OCRItem(ocrResponse: OCRResponse,context:Context, navController: NavController) {
+  //Toast.makeText(context,BASE_URL+"upload/"+ocrResponse.image_name , Toast.LENGTH_LONG).show()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {
+                navController.navigate("ocrItemScreen/${ocrResponse.image_name}/${ocrResponse.title}")
+
+
+            },
         elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
-        Row {
+        Row (verticalAlignment = Alignment.CenterVertically){
             AsyncImage(
                 model = BASE_URL+"upload/"+ocrResponse.image_name,
                 contentDescription = "Network Image",
                 modifier = Modifier
-                    .height(50.dp)
+                    .height(100.dp).width(100.dp).padding(8.dp)
             )
         Column(modifier = Modifier.padding(16.dp)) {
             // Image name
             Text(
-                text = "Image Name: ${ocrResponse.image_name}",
+                text ="${ocrResponse.title}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+            /*
 
             // Error details, if available
             ocrResponse.error?.let {
@@ -98,11 +110,11 @@ fun OCRItem(ocrResponse: OCRResponse,context:Context) {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
-
-            // Patient name, if available
+*/
+           /* // Patient name, if available
             ocrResponse.patient_name?.let {
                 Text(text = "Patient: $it", style = MaterialTheme.typography.bodyLarge)
-            }
+            }*/
 
             // Prescription details
             ocrResponse.prescription?.forEach { prescriptionItem ->
@@ -114,18 +126,18 @@ fun OCRItem(ocrResponse: OCRResponse,context:Context) {
             }
         }
     }
-    }*/
+    }
 
 }
 @Preview(showBackground = true)
 @Composable
 fun PreviewFolderScreen() {
 
-
+   // OCRItem(OCRResponse("","",image_name="file-1732749608704-151419999.jpg", __v = 0), LocalContext.current)
 
 
     // Use a mocked version of the OCRViewModel
 
     // FolderScreen composable with mocked viewModel
-    FolderScreen(navController = rememberNavController(), viewModel = OCRViewModel())
+  //  FolderScreen(navController = rememberNavController(), viewModel = OCRViewModel())
 }

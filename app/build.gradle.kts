@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
+    id ("kotlin-parcelize")
 
 }
 
@@ -65,7 +66,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation ("androidx.compose.material:material:1.5.0") // Use the latest version
 
-    implementation("io.coil-kt.coil3:coil-compose:3.0.3") // Use the latest version
+    implementation("io.coil-kt:coil-compose:2.4.0") // Use the latest version
     implementation ("androidx.compose.runtime:runtime-livedata:1.7.5")
     //retrofit import
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
