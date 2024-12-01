@@ -26,13 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.repositories.PreferencesRepository
-import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
-import com.example.medishareandroid.viewModels.ProfileViewModel
 
 @Composable
-fun BottomNavScreen() {
+fun BottomNavScreen(navController: NavController, navController2: NavController) {
     val items = listOf("Home", "Folder", "Plus", "Chat", "Profile")
 
     // Remember pager state
@@ -40,9 +39,10 @@ fun BottomNavScreen() {
 
     // Remember a coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
-    val navController = rememberNavController()  // Ensure you have a NavController for navigating
-    val navController2 = rememberNavController() // Another NavController for ProfileScreen's actions
-    val prefs = PreferencesRepository(LocalContext.current) // Pass PreferencesRepository to ProfileScreen
+    //val navController = rememberNavController()  // Ensure you have a NavController for navigating
+    //val navController2 = rememberNavController() // Another NavController for ProfileScreen's actions
+    val prefs =
+        PreferencesRepository(LocalContext.current) // Pass PreferencesRepository to ProfileScreen
 
 
     // Scaffold Layout for fixed BottomNavigation
@@ -61,18 +61,23 @@ fun BottomNavScreen() {
                                     contentDescription = "Home",
                                     tint = if (pagerState.currentPage == index) Color.Black else Color.Black // All icons will be black
                                 )
+
                                 "Folder" -> Icon(
                                     imageVector = if (pagerState.currentPage == index) Icons.Filled.Folder else Icons.Outlined.Folder,
                                     contentDescription = "Folder",
                                     tint = if (pagerState.currentPage == index) Color.Black else Color.Black // All icons will be black
                                 )
+
                                 "Plus" -> {
                                     // Show the icon with a smaller background when selected
                                     if (pagerState.currentPage == index) {
                                         Box(
                                             modifier = Modifier
                                                 .padding(4.dp) // Smaller padding for the background
-                                                .background(Color.Black, shape = RoundedCornerShape(12.dp)) // Rounded corners
+                                                .background(
+                                                    Color.Black,
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) // Rounded corners
                                                 .size(40.dp) // Control the size of the background (smaller than before)
                                         ) {
                                             Icon(
@@ -91,11 +96,13 @@ fun BottomNavScreen() {
                                         )
                                     }
                                 }
+
                                 "Chat" -> Icon(
                                     imageVector = if (pagerState.currentPage == index) Icons.Filled.Chat else Icons.Outlined.Chat,
                                     contentDescription = "Chat",
                                     tint = if (pagerState.currentPage == index) Color.Black else Color.Black // All icons will be black
                                 )
+
                                 "Profile" -> Icon(
                                     imageVector = if (pagerState.currentPage == index) Icons.Filled.Person else Icons.Outlined.Person,
                                     contentDescription = "Profile",
@@ -110,7 +117,7 @@ fun BottomNavScreen() {
                             }
                         },
                         alwaysShowLabel = false, // Disable label visibility
-                        interactionSource = remember{ MutableInteractionSource() }, // Disable ripple effect (shadow)
+                        interactionSource = remember { MutableInteractionSource() }, // Disable ripple effect (shadow)
                         modifier = Modifier.shadow(0.dp) // Remove any shadow
                     )
                 }
@@ -125,21 +132,26 @@ fun BottomNavScreen() {
                 .padding(innerPadding) // Add padding to avoid overlap with bottom navigation
         ) { page ->
             when (page) {
-                0 -> ExactDesignScreen(navController)
-                1 -> ExactDesignScreen(navController)
-                2 -> ExactDesignScreen(navController)
-                3 -> ExactDesignScreen(navController)
-                4 -> ProfileScreen(
-                    navController = navController,
+                0 -> ExactDesignScreen(navController2)
+                1 -> FolderScreen(navController2, Modifier)
+                2 -> OCRScreen()
+                3 -> FolderScreen(navController2, Modifier)
+                4 -> SettingsScreen(
+                    navController = navController2,
                     userPreferences = prefs,
-                    navController2 = navController2
+                    navController2 = navController
                 ) // Profile screen with NavController            }
             }
         }
-    }}
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun BottomNavScreenPreview() {
-        BottomNavScreen()
+    val navController = rememberNavController()
+    val navController2 = rememberNavController()
+
+    BottomNavScreen(navController, navController2)
 
 }

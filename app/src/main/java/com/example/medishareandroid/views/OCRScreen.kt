@@ -1,64 +1,27 @@
 package com.example.medishareandroid.views
 
-import android.Manifest
-import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
-
-//import android.net.Uri
-import android.util.Log
-
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextButton
-import com.example.medishareandroid.remote.Message
-import com.example.medishareandroid.remote.OCRResponse
-import com.example.medishareandroid.remote.OcrAPI
-import com.example.medishareandroid.remote.ResetPasswordDto
-import com.example.medishareandroid.remote.RetrofitInstance
-import com.example.medishareandroid.remote.UserAPI
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import java.io.File
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import android.provider.DocumentsContract
+
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
-import okio.BufferedSink
-import okio.source
-import java.io.InputStream
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.*
-//import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Lock
+
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -71,8 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
+
 import coil.compose.rememberAsyncImagePainter
 import com.example.medishareandroid.R
 import com.example.medishareandroid.repositories.PreferencesRepository
@@ -81,20 +43,22 @@ import com.example.medishareandroid.views.components.ProfileOptionCard
 import java.io.FileOutputStream
 
 @Composable
-fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel = viewModel()) {
+fun OCRScreen( viewModel: OCRViewModel = viewModel()) {
     val context = LocalContext.current
     val prefs = PreferencesRepository(context)
     val userId = prefs.getId() // Immutable user ID
-    var imageName by remember { mutableStateOf(TextFieldValue("")) }
-    var uploadFilePath by remember { mutableStateOf(TextFieldValue(uploadFilePath1)) }
-    var result by remember { mutableStateOf("") }
 
-    val imageUri = rememberSaveable { mutableStateOf(imageUri1) }
+    //var imageName by remember { mutableStateOf(TextFieldValue("")) }
+    var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
+
+    val imageUri = rememberSaveable { mutableStateOf("") }
     val painter = rememberAsyncImagePainter(
         model = imageUri.value.ifEmpty { R.drawable.profile_image }
     )
+   // val imageUri = rememberSaveable { mutableStateOf("") }
 
-    /*val launcher = rememberLauncherForActivityResult(
+
+    val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
@@ -105,8 +69,17 @@ fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel 
             uploadFilePath = TextFieldValue(path) // Update the global path
         }
     }
+    LaunchedEffect(imageUri.value) {
+        if (imageUri.value.isEmpty()) {
+            // Launch image picker only if imageUri is empty
+            launcher.launch("image/*")
+        }
 
-*/
+
+
+    }
+
+
 
     Column(
         modifier = Modifier
@@ -148,44 +121,7 @@ fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel 
         Spacer(modifier = Modifier.height(10.dp))
         Text("OCR API Demo", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
-        // Display user ID
-//        Text(
-//            text = "User ID: $userId",
-//            fontSize = 16.sp,
-//            modifier = Modifier.padding(8.dp)
-//        )
 
-        // Image name input
-        BasicTextField(
-            value = imageName,
-            onValueChange = { imageName = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            decorationBox = { innerTextField -> innerTextField() },
-            singleLine = true
-        )
-
-        // File path input
-        BasicTextField(
-            value = uploadFilePath,
-            onValueChange = { uploadFilePath = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            decorationBox = { innerTextField -> innerTextField() },
-            singleLine = true
-        )
-
-        // Print the selected file path
-        Text("Selected File Path: ${uploadFilePath.text}")
-
-        Spacer(Modifier.height(16.dp))
-
-        // Result display
-        Text("Result: $result")
-
-        // Spacer to push the buttons to the bottom
         Spacer(modifier = Modifier.weight(1f))
 
         // Bottom buttons section
@@ -194,34 +130,7 @@ fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel 
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
-//            Button(onClick = {
-//                viewModel.analyzeImage(imageUri.value) {
-//                    result = it?.toString() ?: "Error analyzing image"
-//                }
-//            }) {
-//                Text("Analyze Image")
-//            }
 
-//            Button(onClick = {
-//                viewModel.uploadFile(uploadFilePath.text, userId!!, context)
-//            }) {
-//                Text("Upload File")
-//            }
-            /*ProfileOptionCard(
-                icon = Icons.Default.Image,
-                label = "Find Image",
-                onClick = {
-                    //launcher.launch("image/*")*/
-
-                }
-            )*/
-            ProfileOptionCard(
-                icon = Icons.Default.Analytics,
-                label = "Analyze Image",
-                onClick = {  viewModel.analyzeImage(imageUri.value) {
-                    result = it?.toString() ?: "Error analyzing image"
-                } }
-            )
             ProfileOptionCard(
                 icon = Icons.Default.UploadFile,
                 label = "Upload File",
@@ -234,7 +143,7 @@ fun OCRScreen(uploadFilePath1:String, imageUri1:String, viewModel: OCRViewModel 
 @Preview(showBackground = true)
 @Composable
 fun OCRScreenPreview() {
-    OCRScreen("","")
+    OCRScreen()
 }
 
 

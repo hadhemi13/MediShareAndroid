@@ -18,9 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
 import com.example.medishareandroid.views.authScreens.Signup
@@ -32,8 +34,16 @@ import com.example.medishareandroid.views.authScreens.NewPassword
 import com.example.medishareandroid.views.authScreens.RecoveryCodeSceen
 import com.example.medishareandroid.viewModels.AuthViewModel
 import com.example.medishareandroid.viewModels.AuthViewModelFactory
+import com.example.medishareandroid.views.ChangePasswordScreen
 import com.example.medishareandroid.views.EditProfileScreen
+import com.example.medishareandroid.views.ExactDesignScreen
+import com.example.medishareandroid.views.FolderScreen
 import com.example.medishareandroid.views.HomeScreen
+import com.example.medishareandroid.views.OCRScreen
+import com.example.medishareandroid.views.OcrItemScreen
+import com.example.medishareandroid.views.RecommandationScreen
+import com.example.medishareandroid.views.ScreenContent
+import com.example.medishareandroid.views.SettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +107,50 @@ class MainActivity : ComponentActivity() {
                         composable("editProfileScreen"){
                             EditProfileScreen(context, navController)
                         }
+                        composable("changePassword") {
+                            ChangePasswordScreen(navController, preferencesRepository)
+                        }
 
+                        composable("home") { ExactDesignScreen(navController) }
+                        composable("search") { ScreenContent() }
+                        // composable("profile") { ProfileScreen(viewModel, navController) }
+                        composable("editProfileScreen") {
+                            EditProfileScreen(context, navController)
+                        }
+                     
+                        composable("changePassword") {
+                            ChangePasswordScreen(navController, preferencesRepository)
+                        }
+                        composable(
+                            route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",
+                            arguments = listOf(
+                                navArgument("filePath") { type = NavType.StringType },
+                                navArgument("imageUri") { type = NavType.StringType }
+                            )
+                        ) {
+                            // Pass arguments to the composable
+                            OCRScreen(
+                                //   uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
+                                // imageUri1 = it.arguments?.getString("imageUri") ?: ""
+                            )
+                        }
+                        composable("folder") {
+                            FolderScreen(navController, modifier = Modifier.padding(innerPadding))
+                        }
+                        composable("ocrItemScreen/{imageName}/{title}") { backStackEntry ->
+                            // Retrieve the imageName argument
+                            val imageName = backStackEntry.arguments?.getString("imageName") ?: "No Image"
+                            val title = backStackEntry.arguments?.getString("title") ?: "No title"
+
+                            OcrItemScreen(imageName = imageName, title)
+                        }
+                        composable("recommendationItem/{title}/{desc}") { backStackEntry ->
+                            // Retrieve the imageName argument
+                            val desc = backStackEntry.arguments?.getString("desc") ?: "No desc"
+                            val title = backStackEntry.arguments?.getString("title") ?: "No title"
+
+                            RecommandationScreen(title = title, description = desc)
+                        }
 
                     }
 

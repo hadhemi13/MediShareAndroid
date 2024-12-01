@@ -1,4 +1,4 @@
-package com.example.medishareandroid.views
+    package com.example.medishareandroid.views
 
 
 import android.widget.Toast
@@ -13,9 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Brightness2
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -27,9 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,7 +47,7 @@ fun ProfileScreen(navController: NavController, userPreferences: PreferencesRepo
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize()  
 
             .background(Color(0xFFF9F9F9)) // Background for the screen
     ) {
@@ -214,7 +210,7 @@ fun ProfileInfo(prefs: PreferencesRepository) {
             ) {
                 // Ensure both texts start at the same X position by using Modifier.fillMaxWidth()
                 Text(
-                    text = "${prefs.getName() ?: "Guest"}",
+                    text = prefs.getName() ?: "Guest",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,

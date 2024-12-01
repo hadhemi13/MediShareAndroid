@@ -12,8 +12,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Brightness2
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,8 +41,6 @@ import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.ui.theme.MediSHareAndroidTheme
 import com.example.medishareandroid.viewModels.SettingsViewModel
 import com.example.medishareandroid.views.components.ProfileOptionCard
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.asImageBitmap
 
 
 @Composable
@@ -54,7 +52,7 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
     //var showChangePasswordPopup by remember { mutableStateOf(false) }
 
     // Observe QR Code bitmap from ViewModel
-    val qrCodeBitmap by viewModel.qrCodeBitmap.collectAsState()
+    //val qrCodeBitmap by viewModel.qrCodeBitmap.collectAsState()
     LaunchedEffect (prefs.getId().toString()) {
         viewModel.fetchQrCode(prefs.getId().toString(),context)
     }
@@ -112,7 +110,7 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+       /* Spacer(modifier = Modifier.height(10.dp))
 
         //qrCode
         Box(modifier = Modifier.size(300.dp).padding(16.dp), contentAlignment = Alignment.Center) {
@@ -127,7 +125,7 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
                 CircularProgressIndicator()
 
         }
-
+*/
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -141,7 +139,13 @@ fun SettingsScreen(navController: NavController, userPreferences: PreferencesRep
                 )
             }
         )
+        Spacer(modifier = Modifier.height(8.dp))
 
+        ProfileOptionCard(
+            icon = Icons.Default.Person,
+            label = "Edit Profile",
+            onClick = { navController.navigate("editProfileScreen") }
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         ProfileOptionCard(

@@ -1,13 +1,8 @@
 package com.example.medishareandroid.views
 
-import android.R
 import android.content.Context
 import com.example.medishareandroid.viewModels.OCRViewModel
 
-
-import android.os.Bundle
-import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.*
@@ -21,15 +16,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-//import coil.decode.ImageSource
 import com.example.medishareandroid.remote.BASE_URL
 import com.example.medishareandroid.remote.OCRResponse
-import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.repositories.PreferencesRepository
 
 
@@ -46,7 +36,7 @@ fun FolderScreen(navController: NavController,modifier: Modifier, viewModel: OCR
 
 
     LaunchedEffect(Unit) {
-        val userId =  // Replace with the actual user ID
+
         viewModel.fetchAllImages(prefs.getId()!!, context)
     }
     // UI elements

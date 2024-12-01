@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
@@ -46,7 +45,6 @@ import com.example.medishareandroid.remote.RecommendationApi
 import com.example.medishareandroid.remote.ReqRes
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.repositories.PreferencesRepository
-import com.example.medishareandroid.viewModels.HomeViewModel
 import retrofit2.Call
 
 @Composable
@@ -326,8 +324,8 @@ fun ClinicsAndRadiologistsList() {
 
 @Composable
 fun RecommendationsSection(navController: NavController) {
-    val viewModel = HomeViewModel()
-    val clinics = viewModel.clinics // Obtenir les données des cliniques
+    //val viewModel = HomeViewModel()
+   // val clinics = viewModel.clinics // Obtenir les données des cliniques
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
 

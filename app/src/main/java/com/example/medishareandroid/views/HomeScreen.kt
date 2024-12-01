@@ -1,12 +1,9 @@
 package com.example.medishareandroid.views
 
 
-import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,37 +13,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.medishareandroid.R
 import com.example.medishareandroid.remote.RecReq
 import com.example.medishareandroid.remote.Recommendation
 import com.example.medishareandroid.remote.RecommendationApi
@@ -54,21 +40,19 @@ import com.example.medishareandroid.remote.ReqRes
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.HomeViewModel
-import com.example.medishareandroid.viewModels.ProfileViewModel
 import com.example.medishareandroid.views.components.RecommendationCard
 import com.example.medishareandroid.views.items.ClinicCard
 import retrofit2.Call
-import okhttp3.Callback
-import okhttp3.Response
+
 
 @Composable
 fun HomeScreen(navController2: NavController) {
     val navController = rememberNavController()
-    val viewModel = ProfileViewModel()
+    //val viewModel = ProfileViewModel()
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavScreen(navController, navController2) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -77,8 +61,8 @@ fun HomeScreen(navController2: NavController) {
         ) {
 
             composable("home") { ExactDesignScreen(navController) }
-            composable("search") { ScreenContent("Search") }
-            composable("profile") { ProfileScreen(viewModel, navController) }
+            composable("search") { ScreenContent() }
+            // composable("profile") { ProfileScreen(viewModel, navController) }
             composable("editProfileScreen") {
                 EditProfileScreen(context, navController)
             }
@@ -97,12 +81,12 @@ fun HomeScreen(navController2: NavController) {
             ) {
                 // Pass arguments to the composable
                 OCRScreen(
-                    uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
-                    imageUri1 = it.arguments?.getString("imageUri") ?: ""
+                    //   uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
+                    // imageUri1 = it.arguments?.getString("imageUri") ?: ""
                 )
             }
             composable("folder") {
-                FolderScreen(navController,modifier=Modifier.padding(innerPadding))
+                FolderScreen(navController, modifier = Modifier.padding(innerPadding))
             }
             composable("ocrItemScreen/{imageName}/{title}") { backStackEntry ->
                 // Retrieve the imageName argument
@@ -111,28 +95,29 @@ fun HomeScreen(navController2: NavController) {
 
                 OcrItemScreen(imageName = imageName, title)
             }
-            composable("recommendationItem/{title}/{desc}"){
-                    backStackEntry ->
+            composable("recommendationItem/{title}/{desc}") { backStackEntry ->
                 // Retrieve the imageName argument
                 val desc = backStackEntry.arguments?.getString("desc") ?: "No desc"
                 val title = backStackEntry.arguments?.getString("title") ?: "No title"
 
-                RecommandationScreen(title = title, description = desc)}
+                RecommandationScreen(title = title, description = desc)
+            }
 
         }
     }
 }
+
 @Composable
-fun ScreenContent(text: String) {
+fun ScreenContent() {
     val viewModel = HomeViewModel()
     val clinics = viewModel.clinics // Obtenir les données des cliniques
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
 
-    // État pour les recommandations
+    // État pour les recommendations
     val recommendations = remember { mutableStateOf<List<Recommendation>>(emptyList()) }
 
-    // Effectuer un appel réseau pour récupérer les recommandations
+    // Effectuer un appel réseau pour récupérer les recommendations
     LaunchedEffect(Unit) {
         val api = RetrofitInstance.getRetrofit().create(RecommendationApi::class.java)
         api.fetchRecommendations(RecReq(preferencesRepository.getId()!!))
@@ -141,12 +126,17 @@ fun ScreenContent(text: String) {
                     if (response.isSuccessful) {
                         val recommendationsList = response.body()?.data
                         if (recommendationsList.isNullOrEmpty()) {
-                            Toast.makeText(context, "No recommendations found", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "No recommendations found", Toast.LENGTH_SHORT)
+                                .show()
                         } else {
                             recommendations.value = recommendationsList
                         }
                     } else {
-                        Toast.makeText(context, "Failed to load recommendations", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Failed to load recommendations",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
@@ -202,7 +192,7 @@ fun ScreenContent(text: String) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Section des recommandations
+        // Section des recommendations
         Text(
             text = "Recommendations",
             fontSize = 18.sp,
@@ -219,7 +209,32 @@ fun ScreenContent(text: String) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    HomeScreen(rememberNavController())
+}
 
+/*
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.text.input.TextFieldValue
+
+ */
+
+/*
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
@@ -259,7 +274,7 @@ fun BottomNavigationBar(navController: NavController) {
                 label = { Text(item.label) },
                 selected = currentDestination?.route == item.route,
                 onClick = {
-                    if(item.route.equals("ocr")){
+                    if(item.route == "ocr"){
                         launcher.launch("image/*")
                     }
                     else{
@@ -295,12 +310,4 @@ data class BottomNavItem(
         else -> Icons.AutoMirrored.Filled.Help
     }
 )
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(rememberNavController())
-}
-
-
-
+*/

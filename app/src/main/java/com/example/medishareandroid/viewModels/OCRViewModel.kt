@@ -3,6 +3,7 @@ package com.example.medishareandroid.viewModels
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +33,12 @@ import retrofit2.Response
 import java.io.File
 
 class OCRViewModel : ViewModel() {
+    private val _isActive = mutableStateOf(false)
+    val isActive: State<Boolean> = _isActive
 
+    fun setIsActive(value: Boolean) {
+        _isActive.value = value
+    }
 
     val api = RetrofitInstance.getRetrofit().create(OcrAPI::class.java)
     fun analyzeImage(imageName: String, onResult: (Map<String, Any>?) -> Unit) {
