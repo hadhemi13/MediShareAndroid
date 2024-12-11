@@ -1,6 +1,7 @@
 package com.example.medishareandroid.views
 
 import android.content.Context
+import androidx.compose.foundation.background
 import com.example.medishareandroid.viewModels.OCRViewModel
 
 import androidx.compose.foundation.clickable
@@ -12,11 +13,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.medishareandroid.remote.BASE_URL
 import com.example.medishareandroid.remote.OCRResponse
@@ -41,6 +45,22 @@ fun FolderScreen(navController: NavController,modifier: Modifier, viewModel: OCR
     }
     // UI elements
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .background(color = Color.Blue),
+            contentAlignment= Alignment.Center
+        ) {
+            Text(
+                text = "Manage all your documents here with ease.",
+                color = Color.White,
+                fontSize = 14.sp,
+                maxLines = 1
+
+
+            )
+        }
         if (isLoading) {
             // Show loading indicator
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -69,11 +89,12 @@ fun OCRItem(ocrResponse: OCRResponse,context:Context, navController: NavControll
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-                navController.navigate("ocrItemScreen/${ocrResponse.image_name}/${ocrResponse.title}")
+                navController.navigate("ocrItemScreen/${ocrResponse._id}")
 
 
             },
-        elevation = CardDefaults.elevatedCardElevation(4.dp)
+        elevation = CardDefaults.elevatedCardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row (verticalAlignment = Alignment.CenterVertically){
             AsyncImage(
@@ -107,13 +128,6 @@ fun OCRItem(ocrResponse: OCRResponse,context:Context, navController: NavControll
             }*/
 
             // Prescription details
-            ocrResponse.prescription?.forEach { prescriptionItem ->
-                Text(text = "Activity: ${prescriptionItem.activity}", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Frequency: ${prescriptionItem.frequency}", style = MaterialTheme.typography.bodyMedium)
-                prescriptionItem.location?.let {
-                    Text(text = "Location: $it", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
         }
     }
     }
@@ -129,5 +143,5 @@ fun PreviewFolderScreen() {
     // Use a mocked version of the OCRViewModel
 
     // FolderScreen composable with mocked viewModel
-  //  FolderScreen(navController = rememberNavController(), viewModel = OCRViewModel())
+   FolderScreen(navController = rememberNavController(), Modifier)
 }

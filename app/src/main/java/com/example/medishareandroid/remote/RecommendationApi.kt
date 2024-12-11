@@ -18,4 +18,4 @@ interface RecommendationApi {
 
     data class ReqRes(val success:Boolean, val data:List<Recommendation>)
 
-    data class Recommendation(val title: String, val content:String,val user:String)
+    data class Recommendation(val _id: String, val title: String, val content:String,val user:String, val imageUrl:String)

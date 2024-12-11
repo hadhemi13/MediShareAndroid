@@ -1,5 +1,8 @@
 package com.example.medishareandroid.views
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -21,14 +24,22 @@ import androidx.compose.ui.draw.shadow
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.pager.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.repositories.PreferencesRepository
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun BottomNavScreen(navController: NavController, navController2: NavController) {
@@ -127,6 +138,7 @@ fun BottomNavScreen(navController: NavController, navController2: NavController)
         // Pager for swiping between screens
         HorizontalPager(
             state = pagerState,
+            beyondViewportPageCount = 0, // Avoid preloading adjacent pages
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding) // Add padding to avoid overlap with bottom navigation
@@ -134,7 +146,35 @@ fun BottomNavScreen(navController: NavController, navController2: NavController)
             when (page) {
                 0 -> ExactDesignScreen(navController2)
                 1 -> FolderScreen(navController2, Modifier)
-                2 -> OCRScreen()
+                2 -> {
+                    val context = LocalContext.current
+                    var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
+                    val imageUri = rememberSaveable { mutableStateOf("") }
+                    val launcher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.GetContent()
+                    ) { uri: Uri? ->
+                        uri?.let {
+                            imageUri.value = it.toString()
+
+                            // Extract the file path from the URI and save it to uploadFilePath
+                            val path = getPathFromUri(context, it)
+                            uploadFilePath = TextFieldValue(path) // Update the global path
+                        }
+                    }
+                    OCRScreen("","") // Launch OCRScreen only if it's the current page
+
+                    // Trigger logic only when the page becomes visible
+                    LaunchedEffect(pagerState) {
+                        snapshotFlow { pagerState.currentPage }
+                            .distinctUntilChanged() // Only act on actual page changes
+                            .collect { currentPage ->
+                                if (currentPage == 2) {
+                                    launcher.launch("image/*")
+                                }
+                            }
+                    }
+
+                }
                 3 -> FolderScreen(navController2, Modifier)
                 4 -> SettingsScreen(
                     navController = navController2,

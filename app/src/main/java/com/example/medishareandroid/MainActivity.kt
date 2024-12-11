@@ -43,7 +43,6 @@ import com.example.medishareandroid.views.OCRScreen
 import com.example.medishareandroid.views.OcrItemScreen
 import com.example.medishareandroid.views.RecommandationScreen
 import com.example.medishareandroid.views.ScreenContent
-import com.example.medishareandroid.views.SettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,7 +128,7 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             // Pass arguments to the composable
-                            OCRScreen(
+                            OCRScreen("",""
                                 //   uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
                                 // imageUri1 = it.arguments?.getString("imageUri") ?: ""
                             )
@@ -137,19 +136,20 @@ class MainActivity : ComponentActivity() {
                         composable("folder") {
                             FolderScreen(navController, modifier = Modifier.padding(innerPadding))
                         }
-                        composable("ocrItemScreen/{imageName}/{title}") { backStackEntry ->
+                        composable("ocrItemScreen/{imageName}/{title}/{description}") { backStackEntry ->
                             // Retrieve the imageName argument
                             val imageName = backStackEntry.arguments?.getString("imageName") ?: "No Image"
                             val title = backStackEntry.arguments?.getString("title") ?: "No title"
+                            val description = backStackEntry.arguments?.getString("description") ?: "No title"
 
-                            OcrItemScreen(imageName = imageName, title)
+                            OcrItemScreen(id="")
                         }
                         composable("recommendationItem/{title}/{desc}") { backStackEntry ->
                             // Retrieve the imageName argument
                             val desc = backStackEntry.arguments?.getString("desc") ?: "No desc"
                             val title = backStackEntry.arguments?.getString("title") ?: "No title"
 
-                            RecommandationScreen(title = title, description = desc)
+                            RecommandationScreen(title = title, description = desc, image = "image")
                         }
 
                     }

@@ -38,7 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.medishareandroid.R
+import com.example.medishareandroid.remote.BASE_URL
 import com.example.medishareandroid.remote.RecReq
 import com.example.medishareandroid.remote.Recommendation
 import com.example.medishareandroid.remote.RecommendationApi
@@ -68,19 +70,22 @@ fun ExactDesignScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(15.dp))
 
         // Section title and list of cards
-        SectionTitle("Clinics and Radiologists" , navController)
+        SectionTitle("Clinics and Radiologists", navController)
         Spacer(modifier = Modifier.height(15.dp))
 
         ClinicsAndRadiologistsList()
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        SectionTitle("Recommendations" , navController)
+        SectionTitle("Recommendations", navController)
         Spacer(modifier = Modifier.height(15.dp))
 
         RecommendationsSection(navController)
+        Spacer(modifier = Modifier.height(15.dp))
+
     }
 }
+
 @Composable
 fun BlueHeader() {
     Box(
@@ -103,7 +108,9 @@ fun BlueHeader() {
                     .size(80.dp) // Adjust the size of the image
                     .clip(CircleShape) // Clips the image into a circle
 
-                    .border(2.dp, Color.White, CircleShape) // Optional: Adds a border around the circular image
+                    .border(
+                        2.dp, Color.White, CircleShape
+                    ) // Optional: Adds a border around the circular image
             )
 
             // Column for Text
@@ -119,9 +126,7 @@ fun BlueHeader() {
                     color = Color.White
                 )
                 Text(
-                    text = "Your personalized dashboard",
-                    fontSize = 14.sp,
-                    color = Color.White
+                    text = "Your personalized dashboard", fontSize = 14.sp, color = Color.White
                 )
             }
         }
@@ -165,6 +170,7 @@ fun SearchBar() {
         }
     }
 }
+
 @Composable
 fun ClinicsAndRecommendationsSection() {
     Row(
@@ -215,9 +221,9 @@ fun ClinicsAndRecommendationsSection() {
                 modifier = Modifier
                     .fillMaxWidth() // Ensure Box fills the width of the screen
                     .height(65.dp) // Set a fixed height for the Recommendations card
-                    .background(Color(0x80BEB0FF)
-                        , RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.CenterStart
+                    .background(
+                        Color(0x80BEB0FF), RoundedCornerShape(16.dp)
+                    ), contentAlignment = Alignment.CenterStart
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Start, // Ensure the content is aligned at the start
@@ -246,9 +252,9 @@ fun ClinicsAndRecommendationsSection() {
                 modifier = Modifier
                     .fillMaxWidth() // Ensure Box fills the width of the screen
                     .height(65.dp) // Set a fixed height for the Chat card
-                    .background(Color(0x80FFD6AE)
-                        , RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.CenterStart
+                    .background(
+                        Color(0x80FFD6AE), RoundedCornerShape(16.dp)
+                    ), contentAlignment = Alignment.CenterStart
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Start, // Ensure the content is aligned at the start
@@ -274,7 +280,7 @@ fun ClinicsAndRecommendationsSection() {
 }
 
 @Composable
-fun SectionTitle(title: String , navController: NavController) {
+fun SectionTitle(title: String, navController: NavController) {
 
     Row(
         modifier = Modifier
@@ -284,24 +290,21 @@ fun SectionTitle(title: String , navController: NavController) {
         verticalAlignment = Alignment.CenterVertically // Align items vertically
     ) {
         Text(
-            text = title,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+            text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black
         )
 
         // Three-dot icon (More options)
-        Icon(
-            imageVector = Icons.Default.MoreVert, // Default three dots icon
+        Icon(imageVector = Icons.Default.MoreVert, // Default three dots icon
             contentDescription = "See More",
-            tint = Color.Black ,// Set the color of the icon (you can use any color here)
-            modifier = Modifier.size(24.dp) // Adjust the size of the icon
+            tint = Color.Black,// Set the color of the icon (you can use any color here)
+            modifier = Modifier
+                .size(24.dp) // Adjust the size of the icon
                 .clickable {
                     navController.navigate("newPage")
-                }
-        )
+                })
     }
 }
+
 @Composable
 fun ClinicsAndRadiologistsList() {
     LazyRow(
@@ -325,7 +328,7 @@ fun ClinicsAndRadiologistsList() {
 @Composable
 fun RecommendationsSection(navController: NavController) {
     //val viewModel = HomeViewModel()
-   // val clinics = viewModel.clinics // Obtenir les données des cliniques
+    // val clinics = viewModel.clinics // Obtenir les données des cliniques
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
 
@@ -341,12 +344,15 @@ fun RecommendationsSection(navController: NavController) {
                     if (response.isSuccessful) {
                         val recommendationsList = response.body()?.data
                         if (recommendationsList.isNullOrEmpty()) {
-                            Toast.makeText(context, "No recommendations found", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "No recommendations found", Toast.LENGTH_SHORT)
+                                .show()
                         } else {
                             recommendations.value = recommendationsList
                         }
                     } else {
-                        Toast.makeText(context, "Failed to load recommendations", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context, "Failed to load recommendations", Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
@@ -370,7 +376,12 @@ fun RecommendationsSection(navController: NavController) {
 
         }*/
         items(recommendations.value.size) { index ->
-            RecommendationsCard(title = recommendations.value[index].title, description = recommendations.value[index].content, navController)
+            RecommendationsCard(
+                title = recommendations.value[index].title,
+                description = recommendations.value[index].content,
+                navController,
+                recommendations.value[index].imageUrl
+            )
         }
 
 
@@ -379,10 +390,7 @@ fun RecommendationsSection(navController: NavController) {
 
 @Composable
 fun RadiologistCard(
-    name: String,
-    type: String,
-    openingHour: String,
-    closingHour: String
+    name: String, type: String, openingHour: String, closingHour: String
 ) {
     // Proper state management for favorite
     val isFavorite = remember { mutableStateOf(false) }
@@ -402,10 +410,7 @@ fun RadiologistCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    text = name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black
                 )
                 IconButton(onClick = { isFavorite.value = !isFavorite.value }) {
                     Icon(
@@ -419,8 +424,7 @@ fun RadiologistCard(
 
             // Type and Price
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = type,
@@ -446,64 +450,58 @@ fun RadiologistCard(
 
 @Composable
 fun RecommendationsCard(
-    title: String,
-    description: String,
-    navController: NavController
+
+    title: String, description: String, navController: NavController, image: String
 ) {
     // Card design with rounded corners, padding, and background color
-    Box(
-        modifier = Modifier
-            .width(270.dp)
-            .height(120.dp)
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(10.dp)
-            .clickable {
+    Box(modifier = Modifier
+        .width(270.dp)
+        .height(120.dp)
+        .background(Color.White, RoundedCornerShape(16.dp))
+        .padding(10.dp)
+        .clickable {
 
-                navController.navigate("recommendationItem/${title}/${description}")
+            navController.navigate("recommendationItem/${title}/${description}/${image}")
 
-            }
-    ) {
-        Column {
-            // Card Header (Title and Description with Icon)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Title and Icon
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp) // Size of the background box
-                            .background(Color(0xFFFFF3E0), RoundedCornerShape(8.dp)) // Rounded corners
-                            .padding(6.dp), // Padding around the icon
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star, // Icon next to text
-                            contentDescription = "Recommendation Icon",
-                            modifier = Modifier.size(20.dp),
-                            tint = Color(0xFFFFD54F) // Set the icon color
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
+        }) {
+        Row {
+            AsyncImage(
+                model = BASE_URL + "upload/" + image,
+                contentDescription = "Network Image",
+                modifier = Modifier
+                    .height(100.dp)
+                    .width(100.dp)
+                    .padding(8.dp)
+            )
+            Column {
+                // Card Header (Title and Description with Icon)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Title and Icon
+
+
                     Text(
                         text = title,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
+
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Description below title
+                Text(
+                    text = description,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Gray
+                )
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Description below title
-            Text(
-                text = description,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray
-            )
         }
     }
 }

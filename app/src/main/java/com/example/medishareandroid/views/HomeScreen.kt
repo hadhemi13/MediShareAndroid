@@ -1,8 +1,9 @@
 package com.example.medishareandroid.views
 
-
+import android.net.Uri
 import android.widget.Toast
-
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,22 +14,35 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.LaunchedEffect
-
-
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
@@ -44,7 +58,6 @@ import com.example.medishareandroid.views.components.RecommendationCard
 import com.example.medishareandroid.views.items.ClinicCard
 import retrofit2.Call
 
-
 @Composable
 fun HomeScreen(navController2: NavController) {
     val navController = rememberNavController()
@@ -52,7 +65,7 @@ fun HomeScreen(navController2: NavController) {
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
     Scaffold(
-        bottomBar = { BottomNavScreen(navController, navController2) }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -61,16 +74,20 @@ fun HomeScreen(navController2: NavController) {
         ) {
 
             composable("home") { ExactDesignScreen(navController) }
-            composable("search") { ScreenContent() }
-            // composable("profile") { ProfileScreen(viewModel, navController) }
             composable("editProfileScreen") {
                 EditProfileScreen(context, navController)
             }
-            composable("settings") {
-                SettingsScreen(navController, preferencesRepository, navController2)
+            composable("profile") {
+                ProfileScreen(navController, preferencesRepository, navController2)
             }
             composable("changePassword") {
                 ChangePasswordScreen(navController, preferencesRepository)
+            }
+            composable("chat") {
+                TopPeopleScreen(navController)
+            }
+            composable("newChat") {
+                ChatScreen(userId = preferencesRepository.getId()!!)
             }
             composable(
                 route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",
@@ -81,31 +98,142 @@ fun HomeScreen(navController2: NavController) {
             ) {
                 // Pass arguments to the composable
                 OCRScreen(
-                    //   uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
-                    // imageUri1 = it.arguments?.getString("imageUri") ?: ""
+                    uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
+                    imageUri1 = it.arguments?.getString("imageUri") ?: ""
                 )
             }
             composable("folder") {
                 FolderScreen(navController, modifier = Modifier.padding(innerPadding))
             }
-            composable("ocrItemScreen/{imageName}/{title}") { backStackEntry ->
+            composable("ocrItemScreen/{id}") { backStackEntry ->
                 // Retrieve the imageName argument
-                val imageName = backStackEntry.arguments?.getString("imageName") ?: "No Image"
-                val title = backStackEntry.arguments?.getString("title") ?: "No title"
+                val id = backStackEntry.arguments?.getString("id") ?: "No id"
 
-                OcrItemScreen(imageName = imageName, title)
+                OcrItemScreen(id = id )
             }
-            composable("recommendationItem/{title}/{desc}") { backStackEntry ->
+            composable("recommendationItem/{title}/{desc}/{image}") { backStackEntry ->
                 // Retrieve the imageName argument
                 val desc = backStackEntry.arguments?.getString("desc") ?: "No desc"
                 val title = backStackEntry.arguments?.getString("title") ?: "No title"
+                val image = backStackEntry.arguments?.getString("image") ?: "No image"
 
-                RecommandationScreen(title = title, description = desc)
+
+                RecommandationScreen(title = title, description = desc, image = image)
             }
 
         }
     }
 }
+
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        BottomNavItem("Home", "home", Icons.Filled.Home),
+        BottomNavItem("Folder", "folder", Icons.Outlined.Folder),
+        BottomNavItem("Add", "add", Icons.Outlined.Add),
+        BottomNavItem("Chat", "chat", Icons.AutoMirrored.Outlined.Chat),
+        BottomNavItem("Profile", "profile", Icons.Outlined.Person)
+        //navController.navigate("profile")
+
+    )
+
+    NavigationBar(containerColor = Color.White) {
+
+        val context = LocalContext.current
+
+        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+        var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
+        val imageUri = rememberSaveable { mutableStateOf("") }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri: Uri? ->
+            uri?.let {
+                imageUri.value = it.toString()
+
+                // Extract the file path from the URI and save it to uploadFilePath
+                val path = getPathFromUri(context, it)
+                uploadFilePath = TextFieldValue(path) // Update the global path
+                val destination =
+                    "ocr_screen?filePath=${uploadFilePath.text}&imageUri=${Uri.encode(imageUri.value)}"
+                navController.navigate(destination) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true // Ensure the previous screens are popped
+                    }
+                    launchSingleTop = true // Avoid multiple launches of the same screen
+                }
+
+            }
+        }
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        getBottomNavIcon(item.route, currentDestination?.route == item.route),
+                        contentDescription = item.label
+                    )
+                },
+                //label = { Text(item.label) },
+                selected = currentDestination?.route == item.route ,
+
+                onClick = {
+                    if (item.route == "add") {
+                        launcher.launch("image/*")
+
+                    } else {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                colors = NavigationBarItemColors(
+                    selectedIconColor = Color.Black,
+                    unselectedIconColor = Color.Gray,
+                    selectedTextColor = Color.Black,
+                    selectedIndicatorColor = Color.Transparent,
+                    unselectedTextColor = Color.Gray,
+                    disabledIconColor = Color.Gray,
+                    disabledTextColor = Color.Gray
+
+                ),
+                alwaysShowLabel = false,
+            )
+        }
+    }
+}
+
+data class BottomNavItem(
+    val label: String,
+    val route: String,
+    val icon: ImageVector
+)
+
+
+/*data class BottomNavItem(
+    val label: String,
+    val route: String,
+    val icon: ImageVector = when (route) {
+        "home" -> Icons.Outlined.Home or Icons.Filled.Chat
+        "chat" -> Icons.AutoMirrored.Outlined.Chat
+        "profile" -> Icons.Outlined.Person
+        "folder" -> Icons.Outlined.Folder
+        "ocr" -> Icons.Outlined.Add
+        else -> Icons.AutoMirrored.Filled.Help
+    }
+)*/
+fun getBottomNavIcon(route: String, isSelected: Boolean): ImageVector {
+    return when (route) {
+        "home" -> if (isSelected) Icons.Filled.Home else Icons.Outlined.Home
+        "chat" -> if (isSelected) Icons.AutoMirrored.Filled.Chat else Icons.AutoMirrored.Outlined.Chat
+        "profile" -> if (isSelected) Icons.Filled.Person else Icons.Outlined.Person
+        "folder" -> if (isSelected) Icons.Filled.Folder else Icons.Outlined.Folder
+        "add" -> if (isSelected) Icons.Filled.Add else Icons.Outlined.Add
+        else -> Icons.AutoMirrored.Filled.Help
+    }
+}
+
 
 @Composable
 fun ScreenContent() {
@@ -114,10 +242,10 @@ fun ScreenContent() {
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
 
-    // État pour les recommendations
+    // État pour les recommandations
     val recommendations = remember { mutableStateOf<List<Recommendation>>(emptyList()) }
 
-    // Effectuer un appel réseau pour récupérer les recommendations
+    // Effectuer un appel réseau pour récupérer les recommandations
     LaunchedEffect(Unit) {
         val api = RetrofitInstance.getRetrofit().create(RecommendationApi::class.java)
         api.fetchRecommendations(RecReq(preferencesRepository.getId()!!))
@@ -192,7 +320,7 @@ fun ScreenContent() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Section des recommendations
+        // Section des recommandations
         Text(
             text = "Recommendations",
             fontSize = 18.sp,
@@ -214,100 +342,3 @@ fun ScreenContent() {
 fun HomeScreenPreview() {
     HomeScreen(rememberNavController())
 }
-
-/*
-import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.text.input.TextFieldValue
-
- */
-
-/*
-@Composable
-fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(
-        BottomNavItem("Home", "home"),
-        BottomNavItem("Folder", "folder"),
-        BottomNavItem("Add", "ocr"),
-        BottomNavItem("Search", "search"),
-        BottomNavItem("Profile", "settings")
-                //navController.navigate("settings")
-
-    )
-
-    NavigationBar(containerColor = Color.White) {
-        val context= LocalContext.current
-
-        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-        var uploadFilePath by remember { mutableStateOf(TextFieldValue("")) }
-        val imageUri = rememberSaveable { mutableStateOf("") }
-
-        val launcher = rememberLauncherForActivityResult (
-            contract = ActivityResultContracts.GetContent()
-        ) { uri: Uri? ->
-            uri?.let {
-                imageUri.value = it.toString()
-
-                // Extract the file path from the URI and save it to uploadFilePath
-                val path = getPathFromUri(context, it)
-                uploadFilePath = TextFieldValue(path) // Update the global path
-                val destination = "ocr_screen?filePath=${uploadFilePath.text}&imageUri=${Uri.encode(imageUri.value)}"
-                navController.navigate(destination)
-
-            }
-        }
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                selected = currentDestination?.route == item.route,
-                onClick = {
-                    if(item.route == "ocr"){
-                        launcher.launch("image/*")
-                    }
-                    else{
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true}
-                    }
-                },
-                colors = NavigationBarItemColors(
-                    selectedIconColor = Color.White,
-                    unselectedIconColor = Color.Gray,
-                    selectedTextColor = Color.Black,
-                    selectedIndicatorColor = Color.Black,
-                    unselectedTextColor = Color.Gray,
-                    disabledIconColor = Color.Gray,
-                    disabledTextColor = Color.Gray
-
-              )
-            )
-        }
-    }
-}
-
-data class BottomNavItem(
-    val label: String,
-    val route: String,
-    val icon: ImageVector = when (route) {
-        "home" -> Icons.Default.Home
-        "search" -> Icons.Default.Search
-        "settings" -> Icons.Default.Person
-        "folder" -> Icons.Default.Folder
-        "ocr" -> Icons.Default.AddCircle
-        else -> Icons.AutoMirrored.Filled.Help
-    }
-)
-*/

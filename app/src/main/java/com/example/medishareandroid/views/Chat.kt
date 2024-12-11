@@ -1,6 +1,7 @@
 package com.example.medishareandroid.views
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,10 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
 
 @Composable
-fun TopPeopleScreen() {
+fun TopPeopleScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +49,8 @@ fun TopPeopleScreen() {
             fontSize = 20.sp,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally) // Center the text horizontally
-                .padding(bottom = 16.dp) // Add space below the text
+                .padding(bottom = 16.dp).clickable { navController.navigate("newChat") }, // Add space below the text
+
         )
         Spacer(modifier = Modifier.height(16.dp)) // Add space before the list of people
 
@@ -104,5 +108,5 @@ data class Person(val name: String, val title: String, val image: Int)
 @Preview(showBackground = true)
 @Composable
 fun TopPeopleScreenPreview() {
-    TopPeopleScreen()
+    TopPeopleScreen(rememberNavController())
 }

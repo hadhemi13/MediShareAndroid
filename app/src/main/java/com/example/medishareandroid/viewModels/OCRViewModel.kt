@@ -17,8 +17,10 @@ import com.example.medishareandroid.remote.Message
 import com.example.medishareandroid.remote.OCR1Response
 import com.example.medishareandroid.remote.OCRResponse
 import com.example.medishareandroid.remote.OcrAPI
+import com.example.medishareandroid.remote.OcrByIdResponse
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.StatusCode
+import com.example.medishareandroid.remote.getOcrByIdRequest
 import com.example.medishareandroid.repositories.PreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -156,6 +158,7 @@ class OCRViewModel : ViewModel() {
 
     // Function to fetch all images from the API
     fun fetchAllImages(userId: String,context : Context) {
+        Log.d("fetchAll","______________________________fetchall")
         // Make sure the userId is not empty
         if (userId.isEmpty()) {
             _error.postValue("User ID is empty.")
@@ -202,6 +205,69 @@ class OCRViewModel : ViewModel() {
 
                 // Handle network failure or exception
                 _error.postValue("Error fetching images: ${t.message}")
+            }
+        })
+    }
+    private val _errorMessage1 = MutableLiveData<String>()
+    val errorMessage1: LiveData<String> get() = _errorMessage1
+
+    private val _isLoading1 = MutableLiveData<Boolean>()
+    val isLoading1: LiveData<Boolean> get() = _isLoading1
+
+    private val _ocrByIdResponse = MutableLiveData<Map<String, Any>>()
+    val ocrByIdResponse: LiveData<Map<String, Any>> get() = _ocrByIdResponse
+
+    fun getOcrById(userId: String) {
+        // Make sure the userId is not empty
+        if (userId.isEmpty()) {
+            _errorMessage1.postValue("User ID is empty.")
+            return
+        }
+
+        // Set loading state to true
+        _isLoading1.postValue(true)
+
+        // Show loading or perform any necessary pre-call actions
+        _errorMessage1.postValue("Loading...")  // Example message to show a loading state
+
+        // Create request body
+        val getOCRReq = getOcrByIdRequest(userId)
+        Log.d("launch getOcrById view",userId)
+        Log.d("launch request", getOCRReq.toString() )
+
+        // Make the API call using Retrofit
+        api.getOcrById(getOCRReq).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                // Set loading state to false after the API response
+                _isLoading1.postValue(false)
+
+
+                //Toast.makeText(context, "Upload failed: ${response}", Toast.LENGTH_LONG).show()
+                Log.d("ocr response", response.body()!!.toString())
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val data = body // Safely access the dynamic response
+
+                        if (data != null && data.isNotEmpty()) {
+                            _ocrByIdResponse.postValue(body) // Update LiveData with the dynamic response
+                            _errorMessage1.postValue("")
+                        } else {
+                            _errorMessage1.postValue("No data found in the response.")
+                        }
+                    } ?: run {
+                        _errorMessage1.postValue("Response body is null.")
+                    }
+                } else {
+                    _errorMessage1.postValue("Failed to fetch images: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                // Set loading state to false after the failure
+                _isLoading1.postValue(false)
+
+                // Handle network failure or exception
+                _errorMessage1.postValue("Error fetching images: ${t.message}")
             }
         })
     }

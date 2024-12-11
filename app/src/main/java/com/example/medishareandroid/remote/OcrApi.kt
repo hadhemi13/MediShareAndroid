@@ -39,20 +39,20 @@ interface OcrAPI {
 
     @GET("qr/{userId}")
     fun getQrCode(@Path("userId") userId: String): Call<QrResponse>
+
     @POST("files/getAllImages")
     fun getAllImages(@Body getOCRReq: GetOCRReq): Call<List<OCRResponse>>
 
 
-
-
-
-
     @POST("files/getImageDetails")
-    suspend fun getImageDetails(@Body imageId: Map<String, String>): Response<Map<String, Any>>
+    fun getOcrById(@Body ocrById: getOcrByIdRequest): Call<Map<String, Any>>
 
 
+}
 
-    }
+data class getOcrByIdRequest(val id: String)
+
+data class OcrByIdResponse(val res: Map<String, Any>)
 
 data class QrResponse(val qrCode: String)
 
@@ -71,6 +71,7 @@ data class OCR1Req(
 @Parcelize
 data class OCRResponse(
     val _id: String,
+    val description: String,
     val userId: String,
     val error: String? = null,
     val details: String? = null,
@@ -80,13 +81,13 @@ data class OCRResponse(
     val prescription: @RawValue List<PrescriptionItem>? = null,
     val doctor: String? = null,
     val doctor_title: String? = null,
-    val patient:  @RawValue Patient? = null,
+    val patient: @RawValue Patient? = null,
     val prescription_title: String? = null,
-    val items:  @RawValue List<PrescriptionItem>? = null,
+    val items: @RawValue List<PrescriptionItem>? = null,
     val tabs: @RawValue List<Tab>? = null,
     val title: String? = null,
     val __v: Int
-):Parcelable
+) : Parcelable
 
 data class PrescriptionItem(
     val activity: String,
@@ -105,4 +106,11 @@ data class Tab(
 
 data class GetOCRReq(
     val id: String
+)
+
+data class DynamicDocument(
+    val _id: String,
+    val userId: String,
+    val title: String,
+    val image_name: String,
 )

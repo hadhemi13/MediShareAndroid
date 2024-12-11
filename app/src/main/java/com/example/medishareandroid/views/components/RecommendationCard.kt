@@ -52,5 +52,5 @@ fun RecommendationCard(recommendation: Recommendation,onClick: (() -> Unit)? = n
 @Composable
 fun RecommendationCardPreviw(){
 
-    RecommendationCard(Recommendation("title","content1","aaa"))
+    RecommendationCard(Recommendation("title","content1","aaa","",""))
 }
