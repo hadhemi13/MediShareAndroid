@@ -72,15 +72,19 @@ import com.example.medishareandroid.models.User
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.UserAPI
 import com.example.medishareandroid.repositories.PreferencesRepository
-import com.example.medishareandroid.viewModels.AuthViewModel
-import com.example.medishareandroid.viewModels.AuthViewModelFactory
+import com.example.medishareandroid.viewModels.auth.AuthViewModel
+import com.example.medishareandroid.viewModels.auth.AuthViewModelFactory
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
 
-fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier, onLoginClick: () -> Unit) {
+fun LoginScreen(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    onLoginClick: () -> Unit
+) {
     //tates for Username and Password
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
@@ -329,7 +333,7 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier,
                     focusManager.clearFocus()
                     //keyboard hiding
                     keyboardController?.hide()
-                    handleNavigation(context, email, password,navController){onLoginClick()}
+                    handleNavigation(context, email, password, navController) { onLoginClick() }
 
                     /*if (isLoginEnabled) {
                         // Perform login action
@@ -443,19 +447,33 @@ fun handleNavigation(
                 val preferencesRepository = PreferencesRepository(context)
                 preferencesRepository.setName(user.userName)
                 preferencesRepository.setEmail(user.userEmail)
-                preferencesRepository.setId(user.userId )
+                preferencesRepository.setId(user.userId)
                 preferencesRepository.setToken(user.accessToken)
-                preferencesRepository.setToken(user.refreshToken)
+                preferencesRepository.setRole(user.userRole)
 
                 Toast.makeText(context, "Connection successful", Toast.LENGTH_SHORT).show()
 
                 // Appel de la fonction onLoginClick après succès de connexion
                 onLoginClick()
+                if (user.userRole == "patient") {
+                    // Navigation vers la page d'accueil
+                    navController.navigate("homePage") {
+                        popUpTo("loginPage") {
+                            inclusive = true
+                        } // Retirer la page de login de la pile
+                    }
+                } else {
+                    navController.navigate("homeRadiologue") {
+                        popUpTo("launchScreen") {
+                            inclusive = true
+                        } // Retirer la page de login de la pile
+                        popUpTo("launchScreen") {
+                            inclusive = true
+                        }
+                    }
 
-                // Navigation vers la page d'accueil
-                navController.navigate("homePage") {
-                    popUpTo("loginPage") { inclusive = true } // Retirer la page de login de la pile
                 }
+
             } else {
                 val errorMessage = response.errorBody()?.string() ?: "Login failed"
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
@@ -469,7 +487,6 @@ fun handleNavigation(
 }
 
 
-
 @Preview(showBackground = true)
 @Composable
 fun LoginPreviaw() {
@@ -481,7 +498,7 @@ fun LoginPreviaw() {
     val viewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(preferencesRepository)
     )
-    LoginScreen(navController){viewModel.loginUser()}
+    LoginScreen(navController) { viewModel.loginUser() }
 
 
 }

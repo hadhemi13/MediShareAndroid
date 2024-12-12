@@ -3,6 +3,7 @@ package com.example.medishareandroid.views
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -19,18 +20,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
+import com.example.medishareandroid.remote.DiscussionRes
+import com.example.medishareandroid.viewModels.patient.FetchDiscussionViewModel
+
+
+
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
+import com.example.medishareandroid.repositories.PreferencesRepository
 
 @Composable
-fun TopPeopleScreen(navController: NavController) {
+fun TopPeopleScreen(
+    navController: NavController,
+    fetchDiscussionViewModel: FetchDiscussionViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    // Observe the LiveData from the ViewModel
+    val discussions by fetchDiscussionViewModel.discussions.observeAsState(emptyList())
+    val errorMessage by fetchDiscussionViewModel.errorMessage.observeAsState("")
+    val prefs = PreferencesRepository(context)
+    // Trigger fetching discussions (replace "123" with the actual userId)
+    LaunchedEffect(Unit) {
+        fetchDiscussionViewModel.fetchDiscussions(prefs.getId()!!)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         Spacer(modifier = Modifier.height(50.dp))
 
         // Section with Text and Button
@@ -39,8 +62,8 @@ fun TopPeopleScreen(navController: NavController) {
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             modifier = Modifier
-                .align(Alignment.CenterHorizontally) // Center the text horizontally
-                .padding(bottom = 16.dp) // Add space below the text
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 16.dp)
         )
 
         // Button to start a new discussion
@@ -48,54 +71,67 @@ fun TopPeopleScreen(navController: NavController) {
             text = "New discussion\n",
             fontSize = 20.sp,
             modifier = Modifier
-                .align(Alignment.CenterHorizontally) // Center the text horizontally
-                .padding(bottom = 16.dp).clickable { navController.navigate("newChat") }, // Add space below the text
-
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 16.dp)
+                .clickable { navController.navigate("newChat") }
         )
+
         Spacer(modifier = Modifier.height(16.dp)) // Add space before the list of people
 
-        // List of People
-        val people = listOf(
-            Person("Elena Ivanova", "Project Head", R.drawable.chatgpt),
-            Person("Marie Wondy", "Project Manager", R.drawable.chatgpt),
-            Person("Oskar Jansson", "Design Head", R.drawable.chatgpt),
-            Person("Nora Jensen", "UX Writer", R.drawable.chatgpt)
-        )
+        // Display the list or an error message
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        } else {
+            LazyColumn {
+                items(discussions.size) { index ->
+                    val discussion = discussions[index]
 
-        // Displaying each person in a card
-        Column {
-            people.forEach { person ->
-                PersonCard(person)
-                Spacer(modifier = Modifier.height(8.dp))
+                    PersonCard(discussion, navController)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
 }
 
+fun DiscussionRes.toPerson(): Person {
+    return Person(name = this.title, title = "Discussion ID: ${this._id}", image = R.drawable.chatgpt)
+}
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PersonCard(person: Person) {
+fun PersonCard(person: DiscussionRes,navController: NavController) {
     Card(
+        onClick = {
+            navController.navigate("newChat/${person._id}")
+
+        },
         modifier = Modifier.fillMaxWidth(),
         elevation = 2.dp,
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+
+
+
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painter = painterResource(id = person.image),
+                painter = painterResource(R.drawable.chatgpt),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = person.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = person.title, color = Color.Gray, fontSize = 14.sp)
-            }
+
+                Text(text = person.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
             IconButton(onClick = { /* More options action */ }) {
                 Icon(Icons.Default.ArrowForwardIos, contentDescription = "More options")
             }

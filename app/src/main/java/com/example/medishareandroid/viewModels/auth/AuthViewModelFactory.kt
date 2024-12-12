@@ -1,4 +1,4 @@
-package com.example.medishareandroid.viewModels
+package com.example.medishareandroid.viewModels.auth
 
 
 import androidx.lifecycle.ViewModel

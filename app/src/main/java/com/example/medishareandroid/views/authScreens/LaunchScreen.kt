@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -40,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.medishareandroid.viewModels.AuthViewModel
+import com.example.medishareandroid.repositories.PreferencesRepository
+import com.example.medishareandroid.viewModels.auth.AuthViewModel
 import kotlinx.coroutines.delay
 
 class LaunchScreen : ComponentActivity() {
@@ -56,12 +58,23 @@ class LaunchScreen : ComponentActivity() {
 fun AuthScreen(viewModel: AuthViewModel, navController: NavController) {
     // Obtenir l’état de connexion de l’utilisateur
     val isUserLoggedIn by viewModel.isUserLoggedIn.collectAsState()
-
+    val context = LocalContext.current
+    val prefs = PreferencesRepository(context)
     if (isUserLoggedIn) {
-        navController.navigate("homePage") {
-            popUpTo("homePage") { inclusive = true }
+        val routef: String = if (prefs.getRole() == "patient") {
+            "home"
+        } else {
+            "homeRadiologue"
         }
-
+        if (prefs.getRole()=="patient") {
+            navController.navigate(routef) {
+                popUpTo("launchScreen") { inclusive = true }
+            }
+        }else{
+            navController.navigate(routef) {
+                popUpTo("launchScreen") { inclusive = true }
+            }
+        }
     } else {
         LaunchScreenContent(navController)
     }

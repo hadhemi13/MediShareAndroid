@@ -2,7 +2,7 @@ package com.example.medishareandroid.views
 
 import android.content.Context
 import androidx.compose.foundation.background
-import com.example.medishareandroid.viewModels.OCRViewModel
+import com.example.medishareandroid.viewModels.patient.OCRViewModel
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn

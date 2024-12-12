@@ -42,75 +42,77 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medishareandroid.R
-import com.example.medishareandroid.viewModels.ChatViewModel
+import com.example.medishareandroid.viewModels.patient.ChatViewModel
+
 @Composable
 fun ChatScreen(
-    chatViewModel: ChatViewModel = viewModel(),
     userId: String,
-    discussionId: String? = null // Optional parameter to check if there's an ongoing discussion
-) {
+    discussionId: String? = null,
+    chatViewModel: ChatViewModel = viewModel()
+
+    ) {
     val context = LocalContext.current
     val chatMessages by chatViewModel.chatMessages.observeAsState(emptyList())
     val currentDiscussionId by chatViewModel.discussionId.observeAsState()
+    val chatResponse by chatViewModel.chatResponse.observeAsState()
 
-    // Launch effect to load messages if there's a discussionId or start new conversation
+    // Charger la discussion existante ou démarrer une nouvelle
     LaunchedEffect(Unit) {
-        Log.d("launched new chat", "is launched true")
-        if(!discussionId.isNullOrBlank()) {
+        if (!discussionId.isNullOrBlank()) {
             chatViewModel.getDiscussion(discussionId!!, context, userId)
         }
     }
 
     val messageText = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Top Bar
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Barre Supérieure
         TopAppBar(
             backgroundColor = Color(0xC10A46F3),
             navigationIcon = {
-                IconButton(onClick = { /* Handle back action */ }) {
+                IconButton(onClick = { /* Retourner en arrière */ }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             },
-            title = { Text("New Discussion", fontWeight = FontWeight.Bold) },
+            title = { Text("Discussion", fontWeight = FontWeight.Bold) },
             actions = {
-                IconButton(onClick = { /* Handle history action */ }) {
-                    Icon(Icons.Default.History, contentDescription = "Discussion History")
+                IconButton(onClick = { /* Gérer l'historique */ }) {
+                    Icon(Icons.Default.History, contentDescription = "History")
                 }
             }
         )
 
-        // Chat Content
+        // Afficher les messages
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
+                //.padding(horizontal = 8.dp)
+                .padding(bottom = 100.dp)
         ) {
             items(chatMessages) { message ->
-                ChatBubble(message = message.content, isUser = message.role=="user", userImage = if (message.role=="user") R.drawable.profile_image else R.drawable.chatgpt)
+                Log.d("mfdgfd",message.content)
+                ChatBubble(
+                    message = message.content,
+                    isUser = message.role == "user",
+                    userImage = if (message.role == "user") R.drawable.profile_image else R.drawable.chatgpt
+                )
             }
         }
 
-
-        // Message Input
+        // Entrée de Message
         BottomAppBar(
             backgroundColor = Color(0xC10A46F3),
             content = {
                 TextField(
                     value = messageText.value,
                     onValueChange = { messageText.value = it },
-                    placeholder = { Text("Type something...") },
+                    placeholder = { Text("Tapez quelque chose...") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
                 IconButton(onClick = {
                     if (messageText.value.isNotEmpty()) {
-                        // Send message with the current discussionId
                         if (!currentDiscussionId.isNullOrBlank()) {
-                            Log.d("launched new chat", "is send messege true")
-
                             chatViewModel.sendMsg(
                                 messageText.value,
                                 currentDiscussionId!!,
@@ -118,16 +120,12 @@ fun ChatScreen(
                                 userId
                             )
                         } else {
-                            Log.d("launched new chat", "is create chat true")
-
                             chatViewModel.createChat(messageText.value, context, userId)
-                            Log.d("launched new chat", "is create chat true finish")
-
                         }
-                        messageText.value = ""  // Clear input after sending
+                        messageText.value = "" // Réinitialiser le champ
                     }
                 }) {
-                    Icon(Icons.Default.Send, contentDescription = "Send")
+                    Icon(Icons.Default.Send, contentDescription = "Envoyer")
                 }
             }
         )

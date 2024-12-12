@@ -1,4 +1,4 @@
-package com.example.medishareandroid.viewModels
+package com.example.medishareandroid.viewModels.patient
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

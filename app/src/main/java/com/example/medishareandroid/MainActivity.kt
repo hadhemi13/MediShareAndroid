@@ -32,8 +32,8 @@ import com.example.medishareandroid.views.authScreens.ForgotPasswordScreen
 import com.example.medishareandroid.views.authScreens.LoginScreen
 import com.example.medishareandroid.views.authScreens.NewPassword
 import com.example.medishareandroid.views.authScreens.RecoveryCodeSceen
-import com.example.medishareandroid.viewModels.AuthViewModel
-import com.example.medishareandroid.viewModels.AuthViewModelFactory
+import com.example.medishareandroid.viewModels.auth.AuthViewModel
+import com.example.medishareandroid.viewModels.auth.AuthViewModelFactory
 import com.example.medishareandroid.views.ChangePasswordScreen
 import com.example.medishareandroid.views.EditProfileScreen
 import com.example.medishareandroid.views.ExactDesignScreen
@@ -43,6 +43,7 @@ import com.example.medishareandroid.views.OCRScreen
 import com.example.medishareandroid.views.OcrItemScreen
 import com.example.medishareandroid.views.RecommandationScreen
 import com.example.medishareandroid.views.ScreenContent
+import com.example.medishareandroid.views.radiologue.RadiologueNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +68,7 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = "launchScreen" // Pas d'espaces ici
                     ) { // Définissez le NavHost
+
                         composable("launchScreen") {
                             AuthScreen(viewModel, navController) // Appeler la fonction composable LaunchScreenContent
                         }
@@ -89,6 +91,7 @@ class MainActivity : ComponentActivity() {
                             showToolbar.value = true
                             ForgotPasswordScreen(navController, modifier = Modifier)
                         }
+
                         composable("forgotPasswordMail") {
                             RecoveryCodeSceen(navController = navController) // Appeler la fonction composable LaunchScreenContent
                         }
@@ -150,6 +153,10 @@ class MainActivity : ComponentActivity() {
                             val title = backStackEntry.arguments?.getString("title") ?: "No title"
 
                             RecommandationScreen(title = title, description = desc, image = "image")
+                        }
+
+                        composable("homeRadiologue") {
+                            RadiologueNavController(navController)
                         }
 
                     }

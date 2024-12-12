@@ -11,5 +11,6 @@ data class User(
     val userName: String,
     val userEmail: String,
     val accessToken: String,
-    val refreshToken: String
+    val refreshToken: String,
+    val userRole: String,
 )

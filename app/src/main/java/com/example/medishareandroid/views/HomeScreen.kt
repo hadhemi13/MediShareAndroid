@@ -53,7 +53,7 @@ import com.example.medishareandroid.remote.RecommendationApi
 import com.example.medishareandroid.remote.ReqRes
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.repositories.PreferencesRepository
-import com.example.medishareandroid.viewModels.HomeViewModel
+import com.example.medishareandroid.viewModels.patient.HomeViewModel
 import com.example.medishareandroid.views.components.RecommendationCard
 import com.example.medishareandroid.views.items.ClinicCard
 import retrofit2.Call
@@ -61,9 +61,9 @@ import retrofit2.Call
 @Composable
 fun HomeScreen(navController2: NavController) {
     val navController = rememberNavController()
-    //val viewModel = ProfileViewModel()
     val context = LocalContext.current
     val preferencesRepository = PreferencesRepository(context)
+
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
@@ -86,8 +86,10 @@ fun HomeScreen(navController2: NavController) {
             composable("chat") {
                 TopPeopleScreen(navController)
             }
-            composable("newChat") {
-                ChatScreen(userId = preferencesRepository.getId()!!)
+            composable("newChat/{discussId}") {backStackEntry ->
+                // Retrieve the imageName argument
+                val discussId = backStackEntry.arguments?.getString("discussId") ?: "No desc"
+                ChatScreen(userId = preferencesRepository.getId()!!, discussionId = discussId)
             }
             composable(
                 route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",

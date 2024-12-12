@@ -16,6 +16,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_EMAIL = "email"
         private const val KEY_ID = "id"
         private const val KEY_TOKEN = "token"
+        private const val KEY_Role = "role"
     }
     fun isUserLoggedIn(): Flow<Boolean> = flow {
         Log.d("isUserLoggedIn","isUserLoggedIn")
@@ -57,7 +58,12 @@ class PreferencesRepository(context: Context) {
     fun getId(): String? {
         return sharedPreferences.getString(KEY_ID, null)
     }
-
+    fun setRole(role: String) {
+        sharedPreferences.edit().putString(KEY_Role, role).apply()
+    }
+    fun getRole(): String? {
+        return sharedPreferences.getString(KEY_Role, null)
+    }
     // Méthode pour enregistrer le token de l'utilisateur
     fun setToken(token: String) {
         sharedPreferences.edit().putString(KEY_TOKEN, token).apply()

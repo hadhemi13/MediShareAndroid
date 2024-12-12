@@ -4,7 +4,6 @@ import com.example.medishareandroid.models.chat.ChatResponse
 import com.example.medishareandroid.models.chat.CreateDiscussionMessage
 import com.example.medishareandroid.models.chat.DiscussionResponse
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -29,4 +28,10 @@ interface ChatApi {
         @Path("userId") userId: String,
         @Path("discussionId") discussionId: String
     ): Call<DiscussionResponse>
+
+    @GET("chat/{userId}")
+    fun getAllDiscussions(
+        @Path("userId") userId: String,
+    ): Call<List<DiscussionRes>>
 }
+data class DiscussionRes (val _id:String,val title: String)

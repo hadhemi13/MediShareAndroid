@@ -1,7 +1,6 @@
 package com.example.medishareandroid.views
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.medishareandroid.remote.BASE_URL
-import com.example.medishareandroid.viewModels.OCRViewModel
+import com.example.medishareandroid.viewModels.patient.OCRViewModel
 
 @Composable
 fun OcrItemScreen(id: String, viewModel: OCRViewModel = viewModel()) {
