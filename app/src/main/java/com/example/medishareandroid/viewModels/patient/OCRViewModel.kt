@@ -10,11 +10,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medishareandroid.remote.GetOCRReq
+import com.example.medishareandroid.remote.GetOcrByIdRequest
 import com.example.medishareandroid.remote.OCR1Response
 import com.example.medishareandroid.remote.OCRResponse
 import com.example.medishareandroid.remote.OcrAPI
 import com.example.medishareandroid.remote.RetrofitInstance
-import com.example.medishareandroid.remote.getOcrByIdRequest
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -134,6 +134,12 @@ class OCRViewModel : ViewModel() {
                 }
             })
     }
+
+
+
+
+
+
     // LiveData for OCR responses
     private val _ocrResponses = MutableLiveData<List<OCRResponse>>()
     val ocrResponses: LiveData<List<OCRResponse>> get() = _ocrResponses
@@ -221,7 +227,7 @@ class OCRViewModel : ViewModel() {
         _errorMessage1.postValue("Loading...")  // Example message to show a loading state
 
         // Create request body
-        val getOCRReq = getOcrByIdRequest(userId)
+        val getOCRReq = GetOcrByIdRequest(userId)
         Log.d("launch getOcrById view",userId)
         Log.d("launch request", getOCRReq.toString() )
 

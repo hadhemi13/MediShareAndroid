@@ -61,14 +61,14 @@ fun RadiologueNavController(navControllerMain: NavController) {
                 ImageIrm(navController, imageId, imageName, title)
             }
             composable(
-                route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",
+                route = "uploadImage?filePath={filePath}&imageUri={imageUri}",
                 arguments = listOf(
                     navArgument("filePath") { type = NavType.StringType },
                     navArgument("imageUri") { type = NavType.StringType }
                 )
             ) {
                 // Pass arguments to the composable
-                OCRScreen(
+                UploadImage(
                     uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
                     imageUri1 = it.arguments?.getString("imageUri") ?: ""
                 )

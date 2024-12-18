@@ -27,14 +27,7 @@ interface OcrAPI {
         @Part file: MultipartBody.Part,
         @Part("userId") userId: RequestBody // Ensure userId is passed as a RequestBody
     ): Call<OCR1Response>
-    /* @Multipart
-     @POST("upload")
-     suspend fun uploadFile(
-         @Part file: MultipartBody.Part,
-         @Part("userId") userId: RequestBody
-     ): OCRResponse
 
- */
 
 
     @GET("qr/{userId}")
@@ -45,14 +38,13 @@ interface OcrAPI {
 
 
     @POST("files/getImageDetails")
-    fun getOcrById(@Body ocrById: getOcrByIdRequest): Call<Map<String, Any>>
+    fun getOcrById(@Body ocrById: GetOcrByIdRequest): Call<Map<String, Any>>
 
 
 }
 
-data class getOcrByIdRequest(val id: String)
+data class GetOcrByIdRequest(val id: String)
 
-data class OcrByIdResponse(val res: Map<String, Any>)
 
 data class QrResponse(val qrCode: String)
 
@@ -60,13 +52,9 @@ data class QrResponse(val qrCode: String)
 data class OCR1Response(
     val message: String,
     val filePath: String
-    // val extractedData: Map<String, Any>? = null
 )
 
-data class OCR1Req(
-    val file: File,
-    val userId: String
-)
+
 
 @Parcelize
 data class OCRResponse(
@@ -95,22 +83,9 @@ data class PrescriptionItem(
     val location: String? = null
 )
 
-data class Patient(
-    val name: String,
-    val date: String
-)
+data class Patient(val name: String, val date: String)
 
-data class Tab(
-    val name: String
-)
+data class Tab(val name: String)
 
-data class GetOCRReq(
-    val id: String
-)
+data class GetOCRReq(val id: String)
 
-data class DynamicDocument(
-    val _id: String,
-    val userId: String,
-    val title: String,
-    val image_name: String,
-)

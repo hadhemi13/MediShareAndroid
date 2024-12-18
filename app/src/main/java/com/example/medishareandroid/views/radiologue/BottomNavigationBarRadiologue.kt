@@ -33,7 +33,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.models.radiologue.BottomNavItemR
-import com.example.medishareandroid.views.getPathFromUri
 
 @Composable
 fun BottomNavigationBarRadiologue(navController: NavController) {
@@ -60,10 +59,9 @@ fun BottomNavigationBarRadiologue(navController: NavController) {
                 imageUri.value = it.toString()
 
                 // Extract the file path from the URI and save it to uploadFilePath
-                val path = getPathFromUri(context, it)
+                val path =getPathFromUri(context, it)
                 uploadFilePath = TextFieldValue(path) // Update the global path
-                val destination =""
-                    //"ocr_screen?filePath=${uploadFilePath.text}&imageUri=${Uri.encode(imageUri.value)}"
+                val destination = "uploadImage?filePath=${uploadFilePath.text}&imageUri=${Uri.encode(imageUri.value)}"
                 navController.navigate(destination) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true // Ensure the previous screens are popped

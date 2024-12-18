@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,16 +22,22 @@ import coil.compose.AsyncImage
 import com.example.medishareandroid.remote.BASE_URL
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.radiologue.CreatePostViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun FileDetailsPage(
-    navController: NavController, imageId :String, imageName:String, title:String,
+    navController: NavController, imageId: String, imageName: String, title: String,
     postViewModel: CreatePostViewModel = viewModel()
 ) {
     val description = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val prefs = PreferencesRepository(context)
+    val userId = prefs.getId()
+    val editableTitle = remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -81,11 +88,10 @@ fun FileDetailsPage(
 
                 // Title input field
                 OutlinedTextField(
-                    value = title,
-                    onValueChange = {},
+                    value = editableTitle.value,
+                    onValueChange = { editableTitle.value = it }, // Met à jour l'état
                     label = { Text("Title du post") },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = false
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -103,25 +109,16 @@ fun FileDetailsPage(
                 // Submit button
                 Button(
                     onClick = {
-                        /*coroutineScope.launch {
-                            val newPost = PostRequest(
-                                idImage = image.id,
-                                image = image.imageName,
-                                description = description.value,
-                                title = "Auto title"
-                            )
-                            val userId = getUserIdFromPreferences() // Mocked function
+                        coroutineScope.launch {
                             postViewModel.createPost(
-                                mapOf(
-                                    "title" to newPost.title,
-                                    "imageId" to newPost.idImage,
-                                    "content" to newPost.description,
-                                    "userid" to userId,
-                                    "subreddit" to "dfsdfds"
-                                )
+                                title = title,
+                                imageId = imageId,
+                                content = description.value,
+                                userid = userId!!,
+                                subreddit = "tag"
                             )
-                            navController.popBackStack()
-                        }*/
+                            navController.popBackStack() // Navigate back after submission
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
