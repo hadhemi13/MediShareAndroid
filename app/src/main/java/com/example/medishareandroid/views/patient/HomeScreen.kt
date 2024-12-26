@@ -1,4 +1,4 @@
-package com.example.medishareandroid.views
+package com.example.medishareandroid.views.patient
 
 import android.net.Uri
 import android.widget.Toast
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -54,6 +55,11 @@ import com.example.medishareandroid.remote.ReqRes
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.patient.HomeViewModel
+import com.example.medishareandroid.views.profile.ChangePasswordScreen
+import com.example.medishareandroid.views.ChatScreen
+import com.example.medishareandroid.views.profile.EditProfileScreen
+import com.example.medishareandroid.views.profile.ProfileScreen
+import com.example.medishareandroid.views.TopPeopleScreen
 import com.example.medishareandroid.views.components.RecommendationCard
 import com.example.medishareandroid.views.items.ClinicCard
 import retrofit2.Call
@@ -90,6 +96,10 @@ fun HomeScreen(navController2: NavController) {
                 // Retrieve the imageName argument
                 val discussId = backStackEntry.arguments?.getString("discussId") ?: "No desc"
                 ChatScreen(userId = preferencesRepository.getId()!!, discussionId = discussId)
+            }
+            composable("newChat") {
+                // Retrieve the imageName argument
+                ChatScreen(userId = preferencesRepository.getId()!!)
             }
             composable(
                 route = "ocr_screen?filePath={filePath}&imageUri={imageUri}",
@@ -332,8 +342,8 @@ fun ScreenContent() {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(recommendations.value.size) { index ->
-                RecommendationCard(recommendation = recommendations.value[index])
+            items(recommendations.value.asReversed()) { recommendation ->
+                RecommendationCard(recommendation = recommendation)
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.medishareandroid.views
+package com.example.medishareandroid.views.patient
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -102,7 +102,7 @@ fun OcrItemScreen(id: String, viewModel: OCRViewModel = viewModel()) {
 
                         // Render Dynamic Attributes
                         data.filterKeys { it !in listOf("title", "image_name", "_id", "userId", "__v") }.forEach { (key, value) ->
-                            AttributeRow(key.toString(), value)
+                            AttributeRow(key.toString(), value ?: "null")
                             Divider(
                                 color = Color.Gray,
                                 thickness = 1.dp,

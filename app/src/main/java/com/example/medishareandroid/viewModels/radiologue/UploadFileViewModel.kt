@@ -19,13 +19,14 @@ class UploadFileViewModel:ViewModel() {
 
 
 
-    fun uploadFileImage(filePath: String, userId: String, context: Context) {
+    fun uploadFileImage(filePath: String, imgTitle : String, userId: String, context: Context) {
         val file = File(filePath)
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
         val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
         // Create RequestBody for userId (to send as plain text)
         val userIdRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), userId)
+        val imgTitledRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), imgTitle)
         // Ensure the file exists
         if (!file.exists()) {
             Log.d("spotcha33", filePath)
@@ -34,7 +35,7 @@ class UploadFileViewModel:ViewModel() {
         }
 
         RetrofitInstance.getRetrofit().create(RadiologueApi::class.java)
-            .uploadFile(multipartBody, userIdRequestBody)  // pass the userId as RequestBody
+            .uploadFile(multipartBody, userIdRequestBody, imgTitledRequestBody)  // pass the userId as RequestBody
             .enqueue(object : Callback<UploadFileRes> {
                 override fun onResponse(call: Call<UploadFileRes>, response: Response<UploadFileRes>) {
                     if (response.isSuccessful) {

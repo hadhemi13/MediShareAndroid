@@ -34,15 +34,15 @@ import com.example.medishareandroid.views.authScreens.NewPassword
 import com.example.medishareandroid.views.authScreens.RecoveryCodeSceen
 import com.example.medishareandroid.viewModels.auth.AuthViewModel
 import com.example.medishareandroid.viewModels.auth.AuthViewModelFactory
-import com.example.medishareandroid.views.ChangePasswordScreen
-import com.example.medishareandroid.views.EditProfileScreen
-import com.example.medishareandroid.views.ExactDesignScreen
-import com.example.medishareandroid.views.FolderScreen
-import com.example.medishareandroid.views.HomeScreen
-import com.example.medishareandroid.views.OCRScreen
-import com.example.medishareandroid.views.OcrItemScreen
-import com.example.medishareandroid.views.RecommandationScreen
-import com.example.medishareandroid.views.ScreenContent
+import com.example.medishareandroid.views.profile.ChangePasswordScreen
+import com.example.medishareandroid.views.profile.EditProfileScreen
+import com.example.medishareandroid.views.patient.ExactDesignScreen
+import com.example.medishareandroid.views.patient.FolderScreen
+import com.example.medishareandroid.views.patient.HomeScreen
+import com.example.medishareandroid.views.patient.OCRScreen
+import com.example.medishareandroid.views.patient.OcrItemScreen
+import com.example.medishareandroid.views.patient.RecommandationScreen
+import com.example.medishareandroid.views.patient.ScreenContent
 import com.example.medishareandroid.views.radiologue.RadiologueNavController
 
 class MainActivity : ComponentActivity() {

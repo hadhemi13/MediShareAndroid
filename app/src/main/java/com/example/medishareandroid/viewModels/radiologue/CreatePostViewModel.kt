@@ -21,7 +21,7 @@ class CreatePostViewModel : ViewModel() {
         subreddit: String
     ) {
 
-        api.createPost(PostRequest(title,imageId,content, userid, subreddit)).enqueue(object : Callback<Post> {
+         api.createPost(PostRequest(title,imageId,content, userid, subreddit)).enqueue(object : Callback<Post> {
             override fun onResponse(
                 call: Call<Post>,
                 response: Response<Post>

@@ -2,7 +2,6 @@ package com.example.medishareandroid.views.radiologue
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,21 +26,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.medishareandroid.R
-import com.example.medishareandroid.models.radiologue.Comment
 import com.example.medishareandroid.models.radiologue.DisplayingPosts
 import com.example.medishareandroid.remote.BASE_URL
 import com.example.medishareandroid.remote.Post
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.radiologue.CreateCommentViewModel
 import com.example.medishareandroid.viewModels.radiologue.FetchPostViewModel
+import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun HomePage(viewModel: FetchPostViewModel= viewModel(), createCommentViewModel: CreateCommentViewModel = viewModel(), userId: String) {
+fun HomePage(
+    viewModel: FetchPostViewModel = viewModel(),
+    createCommentViewModel: CreateCommentViewModel = viewModel(),
+    userId: String, navController: NavController
+) {
 
-    val posts by  viewModel.displayingPosts.observeAsState()
+    val posts by viewModel.displayingPosts.observeAsState()
 
     // Fetch posts from the ViewModel when the composable is first launched
     LaunchedEffect(userId) {
@@ -61,7 +65,7 @@ fun HomePage(viewModel: FetchPostViewModel= viewModel(), createCommentViewModel:
         Column {
             val filters = listOf("Recent", "Trending", "Best", "Risking")
             Log.d("Homeradiologue", "column1----------------")
-            LazyRow(
+            /*LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
@@ -70,12 +74,15 @@ fun HomePage(viewModel: FetchPostViewModel= viewModel(), createCommentViewModel:
                 items(filters) { filter ->
                     Button(
                         onClick = { },
-                        colors = ButtonDefaults.buttonColors(contentColor = Color(0xFF008080), backgroundColor = Color.White),
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color(0xFF008080),
+                            backgroundColor = Color.White
+                        ),
                     ) {
                         Text(filter)
                     }
                 }
-            }
+            }*/
             Log.d("Homeradiologue", "column2----------------")
 
             LazyColumn(
@@ -83,8 +90,12 @@ fun HomePage(viewModel: FetchPostViewModel= viewModel(), createCommentViewModel:
                 contentPadding = PaddingValues(8.dp)
             ) {
                 posts?.let {
-                    items(it) { post ->
-                        PostCard(displayingPost = post, createCommentViewModel= createCommentViewModel)
+                    items(it.asReversed()) { post ->
+                        PostCard(
+                            displayingPost = post,
+                            createCommentViewModel = createCommentViewModel,
+                            viewModel = viewModel, navController= navController
+                        )
                     }
                 } ?: item {
                     Text("No posts available.", modifier = Modifier.padding(16.dp))
@@ -96,17 +107,29 @@ fun HomePage(viewModel: FetchPostViewModel= viewModel(), createCommentViewModel:
         }
     }
 }
+
 @Composable
-fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateCommentViewModel) {
+fun PostCard(
+    displayingPost: DisplayingPosts,
+    createCommentViewModel: CreateCommentViewModel,
+    viewModel: FetchPostViewModel,
+    navController: NavController
+) {
     var showComments by remember { mutableStateOf(false) }
     var commentText by remember { mutableStateOf("") }
     val result by createCommentViewModel.result.observeAsState() // Ensure it's a StateFlow
-    val context= LocalContext.current
+    val context = LocalContext.current
     val prefs = PreferencesRepository(context)
+    val userId = prefs.getId()!!
+    var upvoteState by remember { mutableStateOf(displayingPost.post.statepost) }
+    var nbreVotes by remember { mutableStateOf(displayingPost.post.upvotes) }
+
+
     val isLoading by createCommentViewModel.isLoading.observeAsState(false)
     val errorMessage by createCommentViewModel.error.observeAsState()
     LaunchedEffect(result) {
         if (result != null) {
+            delay(2000) // 2-second delay
             displayingPost.comments = displayingPost.comments + result!!
         }
     }
@@ -117,11 +140,11 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Log.d("postss","${displayingPost.post.toString()}")
+        // Log.d("postss","${displayingPost.post.toString()}")
         Column(modifier = Modifier.padding(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(R.drawable.profile_image) ,
+                    painter = painterResource(R.drawable.profile_image),
                     contentDescription = null,
                     modifier = Modifier
                         .size(50.dp)
@@ -140,10 +163,14 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
             Spacer(modifier = Modifier.height(8.dp))
 
             AsyncImage(
-                model = BASE_URL +displayingPost.post.image,
+                model = BASE_URL + displayingPost.post.image,
                 contentDescription = "Network Image",
                 modifier = Modifier
-                    .height(200.dp).fillMaxWidth().padding(8.dp)
+                    .height(200.dp)
+                    .fillMaxWidth()
+                    .padding(8.dp).clickable {
+                        navController.navigate("imageIrm/noid/${ displayingPost.post.image}/${displayingPost.post.title}")
+                    }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -163,14 +190,31 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowUpward,
-                        contentDescription = "Upvote",
-                        tint = Color.Gray
-                    )
+                    IconButton(
+                        onClick = {
+                            upvoteState = !upvoteState
+                            if(upvoteState){
+                                nbreVotes= nbreVotes + 1
+                            }else
+                            {
+                                nbreVotes= nbreVotes - 1
+                            }
+                            viewModel.setUpvotes(displayingPost.post.id, userId)
+
+
+
+                        }
+                    ) {
+                        Icon(
+
+                            imageVector = Icons.Default.ArrowUpward,
+                            contentDescription = "Upvote",
+                            tint = if (upvoteState) Color.Blue else Color.Gray
+                        )
+                    }
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = displayingPost.post.upvotes.toString(),
+                        text = nbreVotes.toString(),
                         fontSize = 16.sp,
                         color = Color.Gray
                     )
@@ -207,18 +251,18 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
                 Column(modifier = Modifier.padding(8.dp)) {
                     // Example comments
 
-                   // displayingPost.comments
+                    // displayingPost.comments
                     //val comments = listOf("Nice post!", "Interesting content")
                     displayingPost.comments
                         .forEach { comment ->
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Person, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(comment.comment, style = MaterialTheme.typography.body2)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Person, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(comment.comment, style = MaterialTheme.typography.body2)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextField(
@@ -229,12 +273,18 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
                         )
                         IconButton(onClick = {
                             if (commentText.isNotEmpty()) {
+                                displayingPost.comments
                                 // Save comment
-                                createCommentViewModel.createComment(displayingPost.post.id,prefs.getId()!!, commentText)
-                                if (result == null) {
+                                createCommentViewModel.createComment(
+                                    displayingPost.post.id,
+                                    prefs.getId()!!,
+                                    commentText
+                                )
+                                //add comment
+                                /*if (result == null) {
 
                                     Toast.makeText(context, "Error: ${errorMessage ?: "Unknown error"}", Toast.LENGTH_SHORT).show()
-                                }
+                                }*/
                                 commentText = ""
                             }
                         }) {
@@ -253,13 +303,18 @@ fun PostCard(displayingPost: DisplayingPosts, createCommentViewModel: CreateComm
 fun HomePagePreview() {
 
     val dummyPosts = listOf(
-        Post(id = "1", "",1,Content = "Sample post content", timeAgo = "dsdsf", subreddit = "",
-            author = "", profileImage = "", image="", statePost = false
+        Post(
+            id = "1", "", 1, Content = "Sample post content", timeAgo = "dsdsf", subreddit = "",
+            author = "", profileImage = "", image = "", statepost = false
         ),
-        Post(id = "1", "",1,Content = "Sample post content", timeAgo = "dsdsf", subreddit = "",
-            author = "", profileImage = "", image="", statePost = false
-        ),    )
+        Post(
+            id = "1", "", 1, Content = "Sample post content", timeAgo = "dsdsf", subreddit = "",
+            author = "", profileImage = "", image = "", statepost = false
+        ),
+    )
     val dummyViewModel = FetchPostViewModel().apply {
         _postsResponse.value = dummyPosts
     }
-    HomePage(userId = "55", viewModel = dummyViewModel)}
+    val navController= rememberNavController()
+    HomePage(userId = "55", viewModel = dummyViewModel , navController = navController)
+}

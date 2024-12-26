@@ -39,6 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.repositories.PreferencesRepository
+import com.example.medishareandroid.views.patient.ExactDesignScreen
+import com.example.medishareandroid.views.patient.FolderScreen
+import com.example.medishareandroid.views.patient.OCRScreen
+import com.example.medishareandroid.views.patient.getPathFromUri
+import com.example.medishareandroid.views.profile.SettingsScreen
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable

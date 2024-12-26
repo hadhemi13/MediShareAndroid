@@ -1,4 +1,4 @@
-package com.example.medishareandroid.views
+package com.example.medishareandroid.views.patient
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text

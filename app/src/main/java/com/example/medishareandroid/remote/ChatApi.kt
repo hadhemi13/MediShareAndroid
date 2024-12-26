@@ -20,7 +20,7 @@ interface ChatApi {
      fun addMessage(
         @Path("userId") userId: String,
         @Path("discussionId") discussionId: String,
-        @Body userMessage: String
+        @Body message: MessageReq
     ): Call<ChatResponse>
 
     @GET("chat/{userId}/{discussionId}")
@@ -35,3 +35,5 @@ interface ChatApi {
     ): Call<List<DiscussionRes>>
 }
 data class DiscussionRes (val _id:String,val title: String)
+
+data class MessageReq(val message:String)

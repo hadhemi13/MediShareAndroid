@@ -5,11 +5,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -39,7 +41,7 @@ fun BottomNavigationBarRadiologue(navController: NavController) {
     val items = listOf(
         BottomNavItemR("Home", "homeRadiologue", Icons.Filled.Home),
         BottomNavItemR("Folder", "folderRadiologue", Icons.Outlined.Folder),
-        BottomNavItemR("Add", "upload", Icons.Outlined.Add),
+        BottomNavItemR("Chat", "chat", Icons.Outlined.Add),
         BottomNavItemR("Profile", "profile", Icons.Outlined.Person)
 
     )
@@ -83,7 +85,7 @@ fun BottomNavigationBarRadiologue(navController: NavController) {
                 selected = currentDestination?.route == item.route ,
 
                 onClick = {
-                    if (item.route == "upload") {
+                    /*  if (item.route == "upload") {
                         launcher.launch("image/*")
 
                     } else {
@@ -91,8 +93,14 @@ fun BottomNavigationBarRadiologue(navController: NavController) {
                             popUpTo(navController.graph.startDestinationId)
                             launchSingleTop = true
                         }
+                    }*/*/
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
                     }
                 },
+
+
                 colors = NavigationBarItemColors(
                     selectedIconColor = Color.Black,
                     unselectedIconColor = Color.Gray,
@@ -113,7 +121,7 @@ fun getBottomNavIconR(route: String, isSelected: Boolean): ImageVector {
         "homeRadiologue" -> if (isSelected) Icons.Filled.Home else Icons.Outlined.Home
         "profile" -> if (isSelected) Icons.Filled.Person else Icons.Outlined.Person
         "folderRadiologue" -> if (isSelected) Icons.Filled.Folder else Icons.Outlined.Folder
-        "upload" -> if (isSelected) Icons.Filled.UploadFile else Icons.Outlined.UploadFile
+        "chat" -> if (isSelected) Icons.Filled.Chat else Icons.Outlined.Chat
         else -> Icons.AutoMirrored.Filled.Help
     }
 }

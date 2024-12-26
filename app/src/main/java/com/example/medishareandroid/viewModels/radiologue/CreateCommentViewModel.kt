@@ -51,7 +51,7 @@ class CreateCommentViewModel : ViewModel() {
 
                 override fun onFailure(call: Call<Comment>, t: Throwable) {
                     _isLoading.value = false
-                    _error.value = "Error: ${t.localizedMessage}"
+                    _error.value = "Error to create comment: ${t.localizedMessage}"
                 }
             })
     }

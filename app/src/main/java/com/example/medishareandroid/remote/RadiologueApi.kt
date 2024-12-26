@@ -38,7 +38,7 @@ interface RadiologueApi {
     @POST("image/upload")
     fun uploadFile(
         @Part file: MultipartBody.Part,
-        @Part("userId") userId: RequestBody // Ensure userId is passed as a RequestBody
+        @Part("userId") userId: RequestBody,@Part("title") title:RequestBody // Ensure userId is passed as a RequestBody
     ): Call<UploadFileRes>
 
 
@@ -48,13 +48,19 @@ interface RadiologueApi {
 
     @POST("comment")
     fun createComment(@Body comment: CommentRequest): Call<Comment>
+
+
     @POST("tumor-detection")
     fun detectTumor(@Body request: TumorDetectionRequest): Call<TumorDetectionResponse>
+
+
+    @POST("post/inc/upvotes")
+    fun setUpvotes(@Body upvotesReq :UpvotesReq): Call<UpvotesRes>
 }
 
+data class UpvotesReq(val post_id: String, val userId: String )
 
-
-
+data class UpvotesRes(val success: Boolean, val message: String )
 data class PostsRequests(val userId: String)
 data class UploadFileRes(
     val message: String,
@@ -65,11 +71,11 @@ data class Post(
     val id: String,
     val title: String,
     val upvotes: Int,
-    val timeAgo: String,
+    var timeAgo: String,
     val subreddit: String,
     val Content: String,
     val author: String,
     val image: String,
     val profileImage: String,
-    val statePost: Boolean
+    var statepost: Boolean
 )

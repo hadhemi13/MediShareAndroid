@@ -14,17 +14,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomAppBar
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Card
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.IconButton
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextField
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,12 +60,12 @@ fun ChatScreen(
     val context = LocalContext.current
     val chatMessages by chatViewModel.chatMessages.observeAsState(emptyList())
     val currentDiscussionId by chatViewModel.discussionId.observeAsState()
-    val chatResponse by chatViewModel.chatResponse.observeAsState()
+    //val chatResponse by chatViewModel.chatResponse.observeAsState()
 
-    // Charger la discussion existante ou démarrer une nouvelle
+    // Charger la discussion existent ou démarrer une nouvelle
     LaunchedEffect(Unit) {
         if (!discussionId.isNullOrBlank()) {
-            chatViewModel.getDiscussion(discussionId!!, context, userId)
+            chatViewModel.getDiscussion(discussionId, context, userId)
         }
     }
 
@@ -68,12 +74,8 @@ fun ChatScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         // Barre Supérieure
         TopAppBar(
-            backgroundColor = Color(0xC10A46F3),
-            navigationIcon = {
-                IconButton(onClick = { /* Retourner en arrière */ }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            },
+            backgroundColor = Color.White,
+
             title = { Text("Discussion", fontWeight = FontWeight.Bold) },
             actions = {
                 IconButton(onClick = { /* Gérer l'historique */ }) {
@@ -101,7 +103,7 @@ fun ChatScreen(
 
         // Entrée de Message
         BottomAppBar(
-            backgroundColor = Color(0xC10A46F3),
+            backgroundColor = Color.White,
             content = {
                 TextField(
                     value = messageText.value,
@@ -125,7 +127,7 @@ fun ChatScreen(
                         messageText.value = "" // Réinitialiser le champ
                     }
                 }) {
-                    Icon(Icons.Default.Send, contentDescription = "Envoyer")
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Envoyer")
                 }
             }
         )
@@ -155,6 +157,7 @@ fun ChatBubble(message: String, isUser: Boolean, userImage: Int) {
         Card(
             backgroundColor = if (isUser) Color(0xFFEDEDED) else Color(0x2F0A46F3),
             shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.padding()
         ) {
             Text(message, modifier = Modifier.padding(8.dp))
         }
@@ -176,5 +179,7 @@ fun ChatBubble(message: String, isUser: Boolean, userImage: Int) {
 @Composable
 fun ChatScreenPreview() {
     ChatScreen(userId = "12345")  // Preview with a mock userId
+    ChatBubble(isUser = false, message = "this is ia chat", userImage = R.drawable.chatgpt)
+    ChatBubble(isUser = true, message = "this is human chat", userImage = R.drawable.profile_image)
 }
 

@@ -1,4 +1,4 @@
-package com.example.medishareandroid.views
+package com.example.medishareandroid.views.patient
 
 import androidx.compose.foundation.Image
 

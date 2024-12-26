@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -13,12 +15,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.medishareandroid.repositories.PreferencesRepository
-import com.example.medishareandroid.views.ChangePasswordScreen
-import com.example.medishareandroid.views.EditProfileScreen
-import com.example.medishareandroid.views.FolderScreen
-import com.example.medishareandroid.views.OCRScreen
-import com.example.medishareandroid.views.OcrItemScreen
-import com.example.medishareandroid.views.ProfileScreen
+import com.example.medishareandroid.views.ChatScreen
+import com.example.medishareandroid.views.TopPeopleScreen
+import com.example.medishareandroid.views.profile.ChangePasswordScreen
+import com.example.medishareandroid.views.profile.EditProfileScreen
+import com.example.medishareandroid.views.patient.OcrItemScreen
+import com.example.medishareandroid.views.profile.ProfileScreen
 
 @Composable
 fun RadiologueNavController(navControllerMain: NavController) {
@@ -27,9 +29,12 @@ fun RadiologueNavController(navControllerMain: NavController) {
     val prefs = PreferencesRepository(context)
     val userId = prefs.getId()!!
     Log.d("tteste1", "RadiologueNavController$userId")
+    val showBottomBar = remember { mutableStateOf(true) }
 
     Scaffold(
-        bottomBar = { BottomNavigationBarRadiologue(navController) }
+        bottomBar = { if (showBottomBar.value) {
+            BottomNavigationBarRadiologue(navController)
+        } }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -37,8 +42,20 @@ fun RadiologueNavController(navControllerMain: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
 
+            composable("chat") {
+                TopPeopleScreen(navController)
+            }
+            composable("newChat/{discussId}") {backStackEntry ->
+                // Retrieve the imageName argument
+                val discussId = backStackEntry.arguments?.getString("discussId") ?: "No desc"
+                ChatScreen(userId = userId, discussionId = discussId)
+            }
+            composable("newChat") {backStackEntry ->
+                // Retrieve the imageName argument
 
-            composable("homeRadiologue") { HomePage(userId = userId )}
+                ChatScreen(userId = userId)
+            }
+            composable("homeRadiologue") { HomePage(userId = userId , navController = navController)}
 
 
             composable("folderRadiologue") {
@@ -54,6 +71,7 @@ fun RadiologueNavController(navControllerMain: NavController) {
             }
             composable("imageIrm/{imageId}/{imageName}/{title}") {backStackEntry ->
                 // Retrieve the imageName argument
+
                 val imageId = backStackEntry.arguments?.getString("imageId") ?: "No id"
                 val imageName = backStackEntry.arguments?.getString("imageName") ?: "No id"
                 val title = backStackEntry.arguments?.getString("title") ?: "No id"
@@ -70,7 +88,8 @@ fun RadiologueNavController(navControllerMain: NavController) {
                 // Pass arguments to the composable
                 UploadImage(
                     uploadFilePath1 = it.arguments?.getString("filePath") ?: "",
-                    imageUri1 = it.arguments?.getString("imageUri") ?: ""
+                    imageUri1 = it.arguments?.getString("imageUri") ?: "",
+                    navController
                 )
             }
 

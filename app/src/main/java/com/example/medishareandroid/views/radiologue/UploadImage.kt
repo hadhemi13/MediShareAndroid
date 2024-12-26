@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,36 +30,49 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.medishareandroid.R
 import com.example.medishareandroid.repositories.PreferencesRepository
 import com.example.medishareandroid.viewModels.radiologue.UploadFileViewModel
 import com.example.medishareandroid.views.components.ProfileOptionCard
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.io.FileOutputStream
 
 @Composable
-fun UploadImage(uploadFilePath1:String, imageUri1:String, viewModel: UploadFileViewModel = viewModel()) {
+fun UploadImage(
+    uploadFilePath1: String,
+    imageUri1: String,
+    navController: NavController,
+    viewModel: UploadFileViewModel = viewModel()
+) {
     val context = LocalContext.current
     val prefs = PreferencesRepository(context)
     val userId = prefs.getId() // Immutable user ID
     var imageName by remember { mutableStateOf(TextFieldValue("")) }
     val uploadFilePath by remember { mutableStateOf(TextFieldValue(uploadFilePath1)) }
+    var imgTitle by remember { mutableStateOf("") }
 
     val imageUri = rememberSaveable { mutableStateOf(imageUri1) }
+    val coroutineScope = rememberCoroutineScope()
     val painter = rememberAsyncImagePainter(
         model = imageUri.value.ifEmpty { R.drawable.profile_image }
     )
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp).verticalScroll(rememberScrollState()),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Image picker section
         Box(
             contentAlignment = Alignment.BottomEnd,
-            modifier = Modifier.padding(top = 100.dp)
+            modifier = Modifier
+                .padding(top = 100.dp)
                 .size(100.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
@@ -100,15 +114,27 @@ fun UploadImage(uploadFilePath1:String, imageUri1:String, viewModel: UploadFileV
         Spacer(modifier = Modifier.weight(1f))
 
         // Bottom buttons section
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
+            // Champ de texte pour le nom
+            OutlinedTextField(
+                value = imgTitle,
+                onValueChange = { imgTitle = it },
+                label = { Text("Title") },
+                modifier = Modifier.fillMaxWidth()
+            )
             ProfileOptionCard(
                 icon = Icons.Default.UploadFile,
                 label = "Upload File",
-                onClick = { viewModel.uploadFileImage(uploadFilePath.text, userId!!, context) }
+                onClick = {
+                    coroutineScope.launch {viewModel.uploadFileImage(uploadFilePath.text, imgTitle, userId!!, context)}
+                        navController.popBackStack( "folderRadiologue", inclusive = true)
+                }
+
+
             )
         }
     }
@@ -117,7 +143,7 @@ fun UploadImage(uploadFilePath1:String, imageUri1:String, viewModel: UploadFileV
 @Preview(showBackground = true)
 @Composable
 fun OCRScreenPreview() {
-    UploadImage("","")
+    UploadImage("", "", rememberNavController())
 }
 
 
@@ -147,8 +173,6 @@ fun getPathFromUri(context: Context, uri: Uri): String {
     }
     return filePath
 }
-
-
 
 
 // Helper function to copy the file from content:// URI to app's internal storage

@@ -11,6 +11,7 @@ import com.example.medishareandroid.models.chat.CreateDiscussionMessage
 import com.example.medishareandroid.models.chat.DiscussionResponse
 import com.example.medishareandroid.models.chat.MsgDouble
 import com.example.medishareandroid.remote.ChatApi
+import com.example.medishareandroid.remote.MessageReq
 import com.example.medishareandroid.remote.RetrofitInstance
 
 import retrofit2.Call
@@ -63,7 +64,7 @@ class ChatViewModel : ViewModel() {
 
     // Send Message
     fun sendMsg(message: String, id: String, context: Context, userId: String) {
-        val addMsg = api.addMessage(userId = userId, id, message)
+        val addMsg = api.addMessage(userId = userId, id, MessageReq( message))
         addMsg.enqueue(object : Callback<ChatResponse> {
             override fun onResponse(call: Call<ChatResponse>, response: Response<ChatResponse>) {
                 if (response.isSuccessful) {

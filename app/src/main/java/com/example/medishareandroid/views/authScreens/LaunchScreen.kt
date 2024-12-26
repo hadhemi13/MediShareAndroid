@@ -62,7 +62,7 @@ fun AuthScreen(viewModel: AuthViewModel, navController: NavController) {
     val prefs = PreferencesRepository(context)
     if (isUserLoggedIn) {
         val routef: String = if (prefs.getRole() == "patient") {
-            "home"
+            "homePage"
         } else {
             "homeRadiologue"
         }

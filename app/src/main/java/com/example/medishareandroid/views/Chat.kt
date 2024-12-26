@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -26,7 +27,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.medishareandroid.R
 import com.example.medishareandroid.remote.DiscussionRes
 import com.example.medishareandroid.viewModels.patient.FetchDiscussionViewModel
-
 
 
 import androidx.compose.runtime.*
@@ -86,10 +86,8 @@ fun TopPeopleScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         } else {
-            LazyColumn {
-                items(discussions.size) { index ->
-                    val discussion = discussions[index]
-
+            LazyColumn  {
+                items(discussions.asReversed()) { discussion ->
                     PersonCard(discussion, navController)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -99,12 +97,16 @@ fun TopPeopleScreen(
 }
 
 fun DiscussionRes.toPerson(): Person {
-    return Person(name = this.title, title = "Discussion ID: ${this._id}", image = R.drawable.chatgpt)
+    return Person(
+        name = this.title,
+        title = "Discussion ID: ${this._id}",
+        image = R.drawable.chatgpt
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PersonCard(person: DiscussionRes,navController: NavController) {
+fun PersonCard(person: DiscussionRes, navController: NavController) {
     Card(
         onClick = {
             navController.navigate("newChat/${person._id}")
@@ -115,8 +117,7 @@ fun PersonCard(person: DiscussionRes,navController: NavController) {
         shape = RoundedCornerShape(8.dp),
 
 
-
-    ) {
+        ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -130,7 +131,7 @@ fun PersonCard(person: DiscussionRes,navController: NavController) {
             )
             Spacer(modifier = Modifier.width(16.dp))
 
-                Text(text = person.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = person.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
             IconButton(onClick = { /* More options action */ }) {
                 Icon(Icons.Default.ArrowForwardIos, contentDescription = "More options")
