@@ -3,7 +3,11 @@ package com.example.medishareandroid.viewModels.radiologue
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.medishareandroid.models.radiologue.Patient
+import com.example.medishareandroid.models.radiologue.PatientResponse
 import com.example.medishareandroid.remote.RadiologueApi
 import com.example.medishareandroid.remote.RetrofitInstance
 import com.example.medishareandroid.remote.UploadFileRes
@@ -16,10 +20,33 @@ import retrofit2.Response
 import java.io.File
 
 class UploadFileViewModel:ViewModel() {
+    private val _patients = MutableLiveData<List<Patient>>()
+    val patients: LiveData<List<Patient>> get() = _patients
+
+    fun getPatientsByRadiologist(radiologistId: String, context: Context, onResult: (List<Patient>) -> Unit) {
+        Log.d("Radiologist ID", "Radiologist ID being sent: $radiologistId")
+
+        RetrofitInstance.getRetrofit().create(RadiologueApi::class.java)
+            .getPatientsByRadiologist(radiologistId)
+            .enqueue(object : Callback<PatientResponse> {
+                override fun onResponse(call: Call<PatientResponse>, response: Response<PatientResponse>) {
+                    if (response.isSuccessful) {
+                        val patients = response.body()?.data ?: emptyList()
+                        onResult(patients) // Pass the result to the callback
+                    } else {
+                        Toast.makeText(context, "Failed to fetch patients: ${response.message()}", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<PatientResponse>, t: Throwable) {
+                    Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
 
 
 
-    fun uploadFileImage(filePath: String, imgTitle : String, userId: String, context: Context) {
+    fun uploadFileImage(filePath: String, imgTitle : String, userId: String,patientId: String, context: Context) {
         val file = File(filePath)
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
         val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestFile)
@@ -27,6 +54,8 @@ class UploadFileViewModel:ViewModel() {
         // Create RequestBody for userId (to send as plain text)
         val userIdRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), userId)
         val imgTitledRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), imgTitle)
+        val patientIdRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), patientId)
+
         // Ensure the file exists
         if (!file.exists()) {
             Log.d("spotcha33", filePath)
@@ -35,7 +64,7 @@ class UploadFileViewModel:ViewModel() {
         }
 
         RetrofitInstance.getRetrofit().create(RadiologueApi::class.java)
-            .uploadFile(multipartBody, userIdRequestBody, imgTitledRequestBody)  // pass the userId as RequestBody
+            .uploadFile(multipartBody, userIdRequestBody, imgTitledRequestBody, patientIdRequestBody)  // Pass patientId as RequestBody
             .enqueue(object : Callback<UploadFileRes> {
                 override fun onResponse(call: Call<UploadFileRes>, response: Response<UploadFileRes>) {
                     if (response.isSuccessful) {

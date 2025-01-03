@@ -2,7 +2,10 @@ package com.example.medishareandroid.remote
 
 import com.example.medishareandroid.models.radiologue.Comment
 import com.example.medishareandroid.models.radiologue.CommentRequest
+import com.example.medishareandroid.models.radiologue.ImageRequest
 import com.example.medishareandroid.models.radiologue.ImageResponse
+import com.example.medishareandroid.models.radiologue.ImageResponseWrapper
+import com.example.medishareandroid.models.radiologue.PatientResponse
 import com.example.medishareandroid.models.radiologue.PostRequest
 import com.example.medishareandroid.models.radiologue.TumorDetectionRequest
 import com.example.medishareandroid.models.radiologue.TumorDetectionResponse
@@ -14,6 +17,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 
 interface RadiologueApi {
@@ -27,7 +31,12 @@ interface RadiologueApi {
     fun getAllImages(
         @Body postsRequests: PostsRequests
     ): Call<List<ImageResponse>>
-
+    @POST("image/getImagesByPatient")
+    fun getImagesByPatient(
+        @Body imageRequests: ImageRequest
+    ): Call<ImageResponseWrapper>
+    @GET("auth/getPatientsByRadiologist")
+    fun getPatientsByRadiologist(@Query("radiologistId") radiologistId: String): Call<PatientResponse>
 
     @POST("post")
     fun createPost(
@@ -38,7 +47,9 @@ interface RadiologueApi {
     @POST("image/upload")
     fun uploadFile(
         @Part file: MultipartBody.Part,
-        @Part("userId") userId: RequestBody,@Part("title") title:RequestBody // Ensure userId is passed as a RequestBody
+        @Part("userId") userId: RequestBody,
+        @Part("title") title:RequestBody ,
+        @Part("patientId") patientId: RequestBody
     ): Call<UploadFileRes>
 
 

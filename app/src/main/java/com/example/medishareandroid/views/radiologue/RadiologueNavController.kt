@@ -59,8 +59,18 @@ fun RadiologueNavController(navControllerMain: NavController) {
 
 
             composable("folderRadiologue") {
-                FilesPage(userId = userId, navController = navController)
+                SearchPatientsPage( navController = navController)
             }
+            composable(
+                route = "filesPage/{userId}/{patientId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType },
+                    navArgument("patientId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                val patientId = backStackEntry.arguments?.getString("patientId") ?: ""
+                FilesPage(userId = userId, patientId = patientId, navController = navController)
+            }
+
             composable("detailsImage/{imageId}/{imageName}/{title}") {backStackEntry ->
                 // Retrieve the imageName argument
                 val imageId = backStackEntry.arguments?.getString("imageId") ?: "No id"

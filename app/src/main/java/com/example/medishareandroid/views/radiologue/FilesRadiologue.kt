@@ -37,7 +37,7 @@ import com.example.medishareandroid.viewModels.radiologue.FilesViewModel
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun FilesPage(viewModel: FilesViewModel = viewModel(), userId: String, navController:NavController) {
+fun FilesPage(viewModel: FilesViewModel = viewModel(), userId: String, patientId: String, navController:NavController) {
 
 
     val images by viewModel.imagesResponse.observeAsState(emptyList())
@@ -64,7 +64,7 @@ fun FilesPage(viewModel: FilesViewModel = viewModel(), userId: String, navContro
         }
     }
     LaunchedEffect(userId) {
-        viewModel.fetchImages(userId)
+        viewModel.fetchImages(userId, patientId)
     }
     Scaffold(
         topBar = {
@@ -147,5 +147,5 @@ fun FileCard(image: ImageResponse, navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun FilesPageprview(){
-    FilesPage(userId = "fdgdhg", navController = rememberNavController())
+    FilesPage(userId = "fdgdhg", patientId = "ffd", navController = rememberNavController())
 }
