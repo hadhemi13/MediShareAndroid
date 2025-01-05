@@ -23,20 +23,32 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 //import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 //import androidx.compose.ui.focus.FocusDirection
@@ -58,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,6 +101,7 @@ fun LoginScreen(
     //tates for Username and Password
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     /*val myFontFamily = FontFamily(
         Font(R.font.itimregular), // Remplacez par le nom de votre fichier de police
@@ -101,6 +115,7 @@ fun LoginScreen(
     val focusManager = LocalFocusManager.current
     val usernameFocusRequester = FocusRequester()
     val passwordFocusRequester = FocusRequester()
+    val passwordError = remember { mutableStateOf("") }
 
 //keyboardController allow manually show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -121,10 +136,10 @@ fun LoginScreen(
         //modifier = Modifier
         //  .fillMaxSize()
         //.padding(padding)
-        modifier.imePadding(),
+        modifier.fillMaxSize().imePadding().verticalScroll(scrollState),
         //.padding(16.dp), // General padding for spacing
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
+       // verticalArrangement = Arrangement.Bottom,
 
         ) {
         // spacer user to used to push content towards the center
@@ -181,6 +196,10 @@ fun LoginScreen(
                     color = colorResource(R.color.sign)
                 )
             },
+            leadingIcon = {
+                Icon(Icons.Filled.Email, contentDescription = "Email Icon")
+            },
+
             //keyboardOptions with ImeAction.Next for navigate to next field
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -206,66 +225,13 @@ fun LoginScreen(
             )
 
         )
-
-
-        // password field
-        OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .padding(bottom = 14.dp)
-                .padding(start = 25.dp)
-                .padding(end = 25.dp)
-                .focusRequester(passwordFocusRequester),
-            /*textStyle = androidx.compose.ui.text.TextStyle(
-                color = Color.Black,
-                fontSize = 24.sp
-            ),*/
-
-            label = {
-                Text(
-                    "Password",
-                    color = colorResource(R.color.sign)
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-
-                //KeyboardType.Password hides input for privacy.
-                keyboardType = KeyboardType.Password,
-                //ImeAction.Done changes the keyboard button to "Done"
-                //indicating the final field in the form.
-                imeAction = ImeAction.Done
-            ),
-            //make the password invisible
-            visualTransformation = PasswordVisualTransformation(),
-            //hide key board on done
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide() // Hide the keyboard when Done is pressed
-                    focusManager.clearFocus()  // Clear focus from the text field
-                    // Trigger login or other actions here if necessary
-                }
-            ),
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedTextColor = colorResource(R.color.sign),
-                unfocusedLabelColor = Color.Transparent,
-                unfocusedLeadingIconColor = colorResource(R.color.sign),
-                unfocusedIndicatorColor = colorResource(R.color.sign),
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.sign),
-                focusedLabelColor = Color.Transparent,
-                focusedLeadingIconColor = colorResource(R.color.sign),
-                focusedIndicatorColor = colorResource(R.color.sign),
-                focusedContainerColor = Color.Transparent
-            )
+        PasswordFieldlogin(
+            passwordFocusRequester= passwordFocusRequester,
+            password = password.value,
+            onPasswordChange = { password.value = it },
+            label = "Password",
+            isError = passwordError.value.isNotEmpty() // Set isError based on confirm password error
         )
-
-
-
-
         Row {
 
 
@@ -485,7 +451,72 @@ fun handleNavigation(
         }
     })
 }
+@Composable
+fun PasswordFieldlogin(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    label: String,
+    isError: Boolean,
+    modifier: Modifier = Modifier, passwordFocusRequester:FocusRequester
+) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
 
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        label = {
+            Text(
+                label,
+                color = if (isError) Color.Red else colorResource(R.color.sign)
+            )
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 25.dp)
+            .padding(end = 25.dp)
+            .padding(10.dp).focusRequester(passwordFocusRequester),
+        visualTransformation = if (isPasswordVisible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
+        trailingIcon = {
+            Row {
+                if (isError) {
+                    Icon(
+                        Icons.Filled.Error,
+                        contentDescription = "Error Icon",
+                        tint = Color.Red
+                    )
+                } else {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                            tint = colorResource(R.color.sign)
+                        )
+                    }
+                }
+            }
+        },
+        leadingIcon = {
+            Icon(Icons.Filled.Lock, contentDescription = "Password Icon")
+        },
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            unfocusedTextColor = colorResource(R.color.sign),
+            unfocusedLabelColor = colorResource(R.color.sign),
+            unfocusedLeadingIconColor = colorResource(R.color.sign),
+            unfocusedIndicatorColor = colorResource(R.color.sign),
+            unfocusedContainerColor = Color.Transparent,
+            focusedTextColor = colorResource(R.color.sign),
+            focusedLabelColor = colorResource(R.color.sign),
+            focusedLeadingIconColor = colorResource(R.color.sign),
+            focusedIndicatorColor = colorResource(R.color.sign),
+            focusedContainerColor = Color.Transparent
+        )
+    )
+}
 
 @Preview(showBackground = true)
 @Composable

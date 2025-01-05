@@ -18,6 +18,10 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 class ChatViewModel : ViewModel() {
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val loading: LiveData<Boolean> get() = _isLoading
+
+
     private val api = RetrofitInstance.getRetrofit().create(ChatApi::class.java)
 
     private val _chatResponse = MutableLiveData<ChatResponse>()
@@ -39,10 +43,13 @@ class ChatViewModel : ViewModel() {
 
     // Create Chat
     fun createChat(message: String, context: Context, userId: String) {
+        _isLoading.postValue(true)
         val createDiscussion = api.createDiscussion(userId = userId, message = CreateDiscussionMessage(message))
         createDiscussion.enqueue(object : Callback<ChatResponse> {
             override fun onResponse(call: Call<ChatResponse>, response: Response<ChatResponse>) {
+
                 if (response.isSuccessful) {
+
                     response.body()?.let { body ->
                         _chatResponse.postValue(body)
                         // Refresh messages after chat creation
@@ -56,6 +63,7 @@ class ChatViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
+                _isLoading.postValue(false)
                 showToast(context, t.message ?: "Request failed")
                 Log.e("ChatViewModel", "Chat creation failed", t)
             }
@@ -64,9 +72,12 @@ class ChatViewModel : ViewModel() {
 
     // Send Message
     fun sendMsg(message: String, id: String, context: Context, userId: String) {
+        _isLoading.postValue(true)
+
         val addMsg = api.addMessage(userId = userId, id, MessageReq( message))
         addMsg.enqueue(object : Callback<ChatResponse> {
             override fun onResponse(call: Call<ChatResponse>, response: Response<ChatResponse>) {
+
                 if (response.isSuccessful) {
                     response.body()?.let { body ->
                         _chatResponse.postValue(body)
@@ -81,6 +92,8 @@ class ChatViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
+                _isLoading.postValue(false)
+
                 showToast(context, t.message ?: "Request failed")
                 Log.e("ChatViewModel", "Message sending failed", t)
             }
@@ -89,15 +102,21 @@ class ChatViewModel : ViewModel() {
 
     // Fetch Discussion
     fun getDiscussion(id: String, context: Context, userId: String) {
+
         val getDisc = api.getDiscussion(userId = userId, discussionId = id)
         getDisc.enqueue(object : Callback<DiscussionResponse> {
+
             override fun onResponse(call: Call<DiscussionResponse>, response: Response<DiscussionResponse>) {
                 if (response.isSuccessful) {
+                    _isLoading.postValue(false)
+
                     response.body()?.let { body ->
                         _chatMessages.postValue(body.messages)
                         _currentDiscussionId.postValue(body._id)
                     }
                 } else {
+                    _isLoading.postValue(false)
+
                     val errorMsg = response.errorBody()?.string() ?: "An error occurred"
                     showToast(context, errorMsg)
                     Log.e("ChatViewModel", errorMsg)
@@ -105,6 +124,8 @@ class ChatViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<DiscussionResponse>, t: Throwable) {
+                _isLoading.postValue(false)
+
                 showToast(context, t.message ?: "Request failed")
                 Log.e("ChatViewModel", "Fetching discussion failed", t)
             }

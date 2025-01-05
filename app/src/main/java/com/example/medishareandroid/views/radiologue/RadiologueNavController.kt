@@ -27,7 +27,7 @@ fun RadiologueNavController(navControllerMain: NavController) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val prefs = PreferencesRepository(context)
-    val userId = prefs.getId()!!
+    val userId = prefs.getId() ?: "default_value"
     Log.d("tteste1", "RadiologueNavController$userId")
     val showBottomBar = remember { mutableStateOf(true) }
 
@@ -118,6 +118,7 @@ fun RadiologueNavController(navControllerMain: NavController) {
             composable("changePassword") {
                 ChangePasswordScreen(navController, prefs)
             }
+
 
         }
     }
